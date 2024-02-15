@@ -3,9 +3,44 @@
 #include <signal.h>
 #include <time.h>
 #include "driver/elevio.h"
+#include <stdbool.h>
+
+ void driveUp(){
+    MotorDirection direction = 1;
+    elevio_motorDirection(direction);
+    printf("%d\n", direction);
+    printf("hehehehehehehehe");
+
+}
+
+void startUp(){
+    int onFloor = elevio_floorSensor();
+    printf("%d\n", onFloor);
+    if(onFloor == -1){
+        driveUp();
+    }
+    
+}
+
+int elevatorReady(){
+    return 0;
+}
 
 
 
+
+int main(){
+    elevio_init();
+
+    startUp();
+
+    
+
+
+    return 0;
+}  
+
+/* 
 int main(){
     elevio_init();
     
@@ -49,3 +84,5 @@ int main(){
 
     return 0;
 }
+
+ */
