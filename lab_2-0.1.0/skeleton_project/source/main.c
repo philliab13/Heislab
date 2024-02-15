@@ -5,21 +5,20 @@
 #include "driver/elevio.h"
 #include <stdbool.h>
 
- void driveUp(){
+ void driveUp(int onFloor){
     MotorDirection direction = 1;
-    elevio_motorDirection(direction);
-    printf("%d\n", direction);
-    printf("hehehehehehehehe");
-
+    while(onFloor == -1){
+        elevio_motorDirection(direction);
+        onFloor = elevio_floorSensor();
+    }
 }
 
 void startUp(){
     int onFloor = elevio_floorSensor();
-    printf("%d\n", onFloor);
     if(onFloor == -1){
-        driveUp();
+        driveUp(onFloor);
     }
-    
+    elevatorReady();
 }
 
 int elevatorReady(){
