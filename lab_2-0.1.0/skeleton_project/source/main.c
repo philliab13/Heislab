@@ -4,6 +4,28 @@
 #include <time.h>
 #include "driver/elevio.h"
 #include <stdbool.h>
+#include <unistd.h>
+
+void driveToFLoor(int destinationFloor){
+    /*Safety part*/
+
+    /*the driving part*/
+    int currentFloor = elevio_floorSensor();
+    int difference = destinationFloor - currentFloor;
+    MotorDirection direction;
+    if(difference > 0){
+        direction = 1;
+    }else{
+        direction = -1;
+    }
+    bool safe = safeToDrive();
+    while(difference != 0 && safe){
+        elevio_motorDirection(direction);
+        currentFloor = elevio_floorSensor();
+        difference = destinationFloor - currentFloor;
+        safe = okayToDrive();
+    }
+}
 
  void driveUp(int onFloor){
     MotorDirection direction = 1;
@@ -28,7 +50,6 @@ int elevatorReady(){
 
 
 
-
 int main(){
     elevio_init();
 
@@ -39,6 +60,65 @@ int main(){
 
     return 0;
 }  
+
+/*returning 1 if sucsessfully opened door, 0 otherwise*/
+int openDoor(){
+    int floor = elevio_floorSensor();
+    if(floor > 0){
+        /*set open door light on*/
+        nanosleep(&(struct timespec){0, 20*1000*1000}, NULL);
+        sleep(3);
+        return 1;
+    }else{
+        return 0;
+    }
+}
+/*returning 1 if sucsessfully opened door, 0 otherwise*/
+int closeDoor(){
+    /*check if there is an obstruction*/
+    bool obstruction = elevio_obstruction();
+    if(obstruction){
+        return 0;
+    }else{
+        elevio_doorOpenLamp(0);
+        return 1;
+    }
+}
+
+
+
+
+
+
+bool safeToDrive(){
+    bool door = isDoorOpen();
+    bool stopButton = isStopButton();
+    return door && stopButton;
+}
+bool isDoorOpen(){
+    /*check if the door open lamp is lit*/
+    bool lit = false;
+    return lit;
+}
+bool isStopButton(){
+    /*check if the stop lamp is lit*/
+    bool lit = false;
+    return lit;
+}
+int getCurrentFloor(){
+    /*check floor lamp is lit*/
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
 
 /* 
 int main(){
