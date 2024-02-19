@@ -11,6 +11,7 @@
         elevio_motorDirection(direction);
         onFloor = elevio_floorSensor();
     }
+    print("checking if git is setup right");
 }
 
 void startUp(){
