@@ -66,12 +66,14 @@ void driveToFLoor(int destinationFloor){
         direction = -1;
     }
     bool safe = safeToDrive();
+    elevio_motorDirection(direction);
     while(difference != 0 && safe){
-        elevio_motorDirection(direction);
+        
         currentFloor = elevio_floorSensor();
         difference = destinationFloor - currentFloor;
         safe = safeToDrive();
     }
+    elevio_motorDirection(0);
 }
 
 
