@@ -7,7 +7,7 @@
 #include <unistd.h>
 /*Global variables*/
 bool isDoorOpen = false;
-
+int totalOrders[20][2];
 
 /*Declaring functions so the layout does not matter*/
 bool safeToDrive();
@@ -67,7 +67,10 @@ int elevatorReady(){
 }
 
 int addOrder(floor, button){
-    return 0;
+    int order[2] = {floor, button};
+    int *ptr_order = &order;
+    int nesteFloor = ptr_order[0];
+
 }
 
 
@@ -77,38 +80,7 @@ int main(){
     startUp();
 
     while (true) {}
-    int maxOrders = 10; // Initial guess for the maximum number of orders
-    ElevatorOrder **orders = malloc(maxOrders * sizeof(ElevatorOrder*));
 
-    int currentOrders = 0;
-    int newSource, newDestination;
-
-    // Example of adding new orders in a loop (could be replaced with actual logic)
-    while (scanf("%d %d", &newSource, &newDestination) == 2) {
-        if (currentOrders == maxOrders) {
-            // Increase the size if the maximum is reached
-            maxOrders *= 2;
-            orders = realloc(orders, maxOrders * sizeof(ElevatorOrder*));
-        }
-
-        // Allocate memory for the new order
-        orders[currentOrders] = malloc(sizeof(ElevatorOrder));
-        orders[currentOrders]->sourceFloor = newSource;
-        orders[currentOrders]->destinationFloor = newDestination;
-
-        currentOrders++;
-
-        // Break condition for the example (e.g., when both inputs are -1)
-        if (newSource == -1 && newDestination == -1) break;
-    }
-
-    // Use the orders as needed...
-
-    // Don't forget to free the allocated memory
-    for (int i = 0; i < currentOrders; i++) {
-        free(orders[i]);
-    }
-    free(orders);
 
     
     return 0;
