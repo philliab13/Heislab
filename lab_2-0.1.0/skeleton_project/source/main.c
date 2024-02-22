@@ -5,6 +5,53 @@
 #include "driver/elevio.h"
 #include <stdbool.h>
 #include <unistd.h>
+/*Global variables*/
+bool isDoorOpen = false;
+
+
+/*Declaring functions so the layout does not matter*/
+bool safeToDrive();
+int elevatorReady();
+void driveToFLoor(int destinationFloor);
+/*end of declerations*/
+
+
+
+
+ void driveUp(int onFloor){
+    MotorDirection direction = 1;
+    elevio_motorDirection(direction);
+    while(onFloor == -1){
+        onFloor = elevio_floorSensor();
+    }
+    elevio_motorDirection(0);
+}
+
+void startUp(){
+    int onFloor = elevio_floorSensor();
+    if(onFloor == -1){
+        driveUp(onFloor);
+    }
+    elevatorReady();
+}
+
+int elevatorReady(){
+    ButtonType button = 0;
+    elevio_buttonLamp(2, button, 1);
+    return 0;
+}
+
+
+
+int main(){
+    elevio_init();
+
+    startUp();
+
+    while (true) {}
+    return 0;
+} 
+
 
 void driveToFLoor(int destinationFloor){
     /*Safety part*/
@@ -23,48 +70,18 @@ void driveToFLoor(int destinationFloor){
         elevio_motorDirection(direction);
         currentFloor = elevio_floorSensor();
         difference = destinationFloor - currentFloor;
-        safe = okayToDrive();
+        safe = safeToDrive();
     }
 }
 
- void driveUp(int onFloor){
-    MotorDirection direction = 1;
-    while(onFloor == -1){
-        elevio_motorDirection(direction);
-        onFloor = elevio_floorSensor();
-    }
-    print("checking if git is setup right");
-}
-
-void startUp(){
-    int onFloor = elevio_floorSensor();
-    if(onFloor == -1){
-        driveUp(onFloor);
-    }
-    elevatorReady();
-}
-
-int elevatorReady(){
-    return 0;
-}
-
-
-
-int main(){
-    elevio_init();
-
-    startUp();
-
-    
-
-
-    return 0;
-}  
 
 /*returning 1 if sucsessfully opened door, 0 otherwise*/
 int openDoor(){
     int floor = elevio_floorSensor();
+    /*checking if it safe to open door*/
     if(floor > 0){
+        /*Update global variable to door is open*/
+        isDoorOpen = true;
         /*set open door light on*/
         nanosleep(&(struct timespec){0, 20*1000*1000}, NULL);
         sleep(3);
@@ -80,6 +97,8 @@ int closeDoor(){
     if(obstruction){
         return 0;
     }else{
+        /*Update global variable to door is closed*/
+        isDoorOpen = false;
         elevio_doorOpenLamp(0);
         return 1;
     }
@@ -87,29 +106,13 @@ int closeDoor(){
 
 
 
-
-
-
+/*checking if both the door is closed and the emergency stop button is not pressed before it is safe to drive*/
 bool safeToDrive(){
-    bool door = isDoorOpen();
-    bool stopButton = isStopButton();
-    return door && stopButton;
+    bool stopButton = elevio_stopButton();
+    return !isDoorOpen && !stopButton;
 }
-bool isDoorOpen(){
-    /*check if the door open lamp is lit*/
-    bool lit = false;
-    return lit;
-}
-bool isStopButton(){
-    /*check if the stop lamp is lit*/
-    bool lit = false;
-    return lit;
-}
-int getCurrentFloor(){
-    /*check floor lamp is lit*/
 
-    return 0;
-}
+
 
 
 
