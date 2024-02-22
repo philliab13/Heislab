@@ -76,6 +76,40 @@ int main(){
     startUp();
 
     while (true) {}
+    int maxOrders = 10; // Initial guess for the maximum number of orders
+    ElevatorOrder **orders = malloc(maxOrders * sizeof(ElevatorOrder*));
+
+    int currentOrders = 0;
+    int newSource, newDestination;
+
+    // Example of adding new orders in a loop (could be replaced with actual logic)
+    while (scanf("%d %d", &newSource, &newDestination) == 2) {
+        if (currentOrders == maxOrders) {
+            // Increase the size if the maximum is reached
+            maxOrders *= 2;
+            orders = realloc(orders, maxOrders * sizeof(ElevatorOrder*));
+        }
+
+        // Allocate memory for the new order
+        orders[currentOrders] = malloc(sizeof(ElevatorOrder));
+        orders[currentOrders]->sourceFloor = newSource;
+        orders[currentOrders]->destinationFloor = newDestination;
+
+        currentOrders++;
+
+        // Break condition for the example (e.g., when both inputs are -1)
+        if (newSource == -1 && newDestination == -1) break;
+    }
+
+    // Use the orders as needed...
+
+    // Don't forget to free the allocated memory
+    for (int i = 0; i < currentOrders; i++) {
+        free(orders[i]);
+    }
+    free(orders);
+
+    
     return 0;
 } 
 
@@ -95,14 +129,15 @@ void driveToFloor(int destinationFloor){
     }
     bool safe = safeToDrive();
     elevio_motorDirection(direction);
-
     while(difference != 0 && safe){
+        
         currentFloor = elevio_floorSensor();
         if(currentFloor > -1){
             difference = destinationFloor - currentFloor;
         }
         safe = safeToDrive();
     }
+    elevio_motorDirection(0);
     elevio_motorDirection(0);
 }
 
