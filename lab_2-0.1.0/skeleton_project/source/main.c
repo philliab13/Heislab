@@ -13,6 +13,8 @@ bool isDoorOpen = false;
 bool safeToDrive();
 int elevatorReady();
 void driveToFloor(int);
+void allFloorLightsOff();
+
 /*end of declerations*/
 
 
@@ -44,11 +46,10 @@ int elevatorReady(){
     int maxOrders = 100;
     elevatorOrder **orders = malloc(maxOrders * sizeof(elevatorOrder*));
     int currentOrders = 0;
-    
+
     while(true){
 
 
-        int orders[100][2];
         for(int f = 0; f < N_FLOORS; f++){
             for(int b = 0; b < N_BUTTONS; b++){
                 int btnPressed = elevio_callButton(f, b);
@@ -66,7 +67,7 @@ int elevatorReady(){
 }
 
 int addOrder(floor, button){
-
+    return 0;
 }
 
 
@@ -82,6 +83,7 @@ int main(){
 
 void driveToFloor(int destinationFloor){
     /*Safety part*/
+    elevio_floorIndicator(2);
     /*the driving part*/
     int currentFloor = elevio_floorSensor();
     int difference = destinationFloor - currentFloor;
@@ -102,10 +104,17 @@ void driveToFloor(int destinationFloor){
             difference = destinationFloor - currentFloor;
         }
         safe = safeToDrive();
+
+        /*Updating the lights*/
     }
     elevio_motorDirection(0);
 }
 
+void allFloorLightsOff(){
+    for(int i = 0; i < N_FLOORS; ++i){
+        elevio_floorIndicator(i);
+    }
+}
 
 /*returning 1 if sucsessfully opened door, 0 otherwise*/
 int openDoor(){
