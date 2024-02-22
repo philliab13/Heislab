@@ -12,7 +12,7 @@ bool isDoorOpen = false;
 /*Declaring functions so the layout does not matter*/
 bool safeToDrive();
 int elevatorReady();
-void driveToFLoor(int destinationFloor);
+void driveToFloor(int destinationFloor);
 /*end of declerations*/
 
 
@@ -53,7 +53,7 @@ int main(){
 } 
 
 
-void driveToFLoor(int destinationFloor){
+void driveToFloor(int destinationFloor){
     /*Safety part*/
 
     /*the driving part*/
