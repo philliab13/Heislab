@@ -7,7 +7,8 @@
 #include <unistd.h>
 /*Global variables*/
 bool isDoorOpen = false;
-int totalOrders[20][2];
+int totalOrders[10][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
+
 
 /*Declaring functions so the layout does not matter*/
 bool safeToDrive();
@@ -20,7 +21,93 @@ void allFloorLightsOff();
 
 
 
- void driveUp(int onFloor){
+ 
+typedef struct{
+    int location;
+    int direction;
+}elevatorOrder;
+
+int elevatorReady(){
+    while(true){
+        /*f iterates the different floors 0-3, b iterates the different buttontypes on that floor*/
+        for(int f = 0; f < N_FLOORS; f++){
+            for(int b = 0; b < N_BUTTONS; b++){
+                int btnPressed = elevio_callButton(f, b);
+                elevio_buttonLamp(f, b, btnPressed);
+                /*add order*/
+                if(btnPressed){
+                    addOrder(f,b);
+                }
+            }
+        }
+        executeOrder();
+    }
+    return 0;
+}
+/*Need failsafe for identical orders*/
+int addOrder(floor, button){
+    /*Looking for the first empty spot in the array to insert the new order*/
+    for (int i = 0; i < 10; i++) {
+        if(totalOrders[i][0] = -1){
+            totalOrders[i][0] = floor;
+            totalOrders[i][1] = button;
+            break;
+        }
+    }
+}
+
+void executeOrder(){
+    int targetFloor;
+    int button;
+    int index;
+    int currentFloor = elevio_floorSensor();
+
+    /*Iterates through the order array and picks an order to execute*/
+    for (int i = 0; i < 10; i++) {
+        if(totalOrders[i][0] != -1){
+            targetFloor = totalOrders[i][0];
+            button = totalOrders[i][1];
+            index = i;
+        }
+    }
+    /*this part is for the logic og the up and down buttons outside the elevator*/
+        /*Checking if the order is from the same floor as the elevator, if it is we can open the door*/
+        if(currentFloor == targetFloor){
+            openDoor();
+            deleteOrder(index);
+        }
+        /*Finding out if the floor difference is more than 1, if it is we need to check if there are any floors we should stop by*/
+        if(abs(currentFloor - targetFloor) > 1){
+
+        }
+
+
+
+
+
+    /*check if the order is coming from the floor the elevator is*/
+    /*Logic to find out if there are any orders on the way the elevator should pick up*/
+
+    
+}
+
+
+
+
+
+int main(){
+    elevio_init();
+
+    startUp();
+
+    while (true) {}
+
+
+    
+    return 0;
+} 
+
+void driveUp(int onFloor){
     MotorDirection direction = 1;
     elevio_motorDirection(direction);
     while(onFloor == -1){
@@ -36,56 +123,6 @@ void startUp(){
     }
     elevatorReady();
 }
-typedef struct{
-    int location;
-    int direction;
-}elevatorOrder;
-
-int elevatorReady(){
-    driveToFloor(0);
-    int maxOrders = 100;
-    elevatorOrder **orders = malloc(maxOrders * sizeof(elevatorOrder*));
-    int currentOrders = 0;
-
-    while(true){
-
-
-        for(int f = 0; f < N_FLOORS; f++){
-            for(int b = 0; b < N_BUTTONS; b++){
-                int btnPressed = elevio_callButton(f, b);
-                elevio_buttonLamp(f, b, btnPressed);
-                /*add order*/
-                if(btnPressed){
-                    addOrder(f,b);
-                }
-            }
-        }
-
-    }
-
-    return 0;
-}
-
-int addOrder(floor, button){
-    int order[2] = {floor, button};
-    int *ptr_order = &order;
-    int nesteFloor = ptr_order[0];
-
-}
-
-
-int main(){
-    elevio_init();
-
-    startUp();
-
-    while (true) {}
-
-
-    
-    return 0;
-} 
-
 
 void driveToFloor(int destinationFloor){
     /*Safety part*/
