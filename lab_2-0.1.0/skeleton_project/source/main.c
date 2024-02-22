@@ -12,7 +12,7 @@ bool isDoorOpen = false;
 /*Declaring functions so the layout does not matter*/
 bool safeToDrive();
 int elevatorReady();
-void driveToFLoor(int destinationFloor);
+void driveToFloor(int);
 /*end of declerations*/
 
 
@@ -34,13 +34,40 @@ void startUp(){
     }
     elevatorReady();
 }
+typedef struct{
+    int location;
+    int direction;
+}elevatorOrder;
 
 int elevatorReady(){
-    ButtonType button = 0;
-    elevio_buttonLamp(2, button, 1);
+    driveToFloor(0);
+    int maxOrders = 100;
+    elevatorOrder **orders = malloc(maxOrders * sizeof(elevatorOrder*));
+    int currentOrders = 0;
+    
+    while(true){
+
+
+        int orders[100][2];
+        for(int f = 0; f < N_FLOORS; f++){
+            for(int b = 0; b < N_BUTTONS; b++){
+                int btnPressed = elevio_callButton(f, b);
+                elevio_buttonLamp(f, b, btnPressed);
+                /*add order*/
+                if(btnPressed){
+                    addOrder(f,b);
+                }
+            }
+        }
+
+    }
+
     return 0;
 }
 
+int addOrder(floor, button){
+
+}
 
 
 int main(){
@@ -53,25 +80,30 @@ int main(){
 } 
 
 
-void driveToFLoor(int destinationFloor){
+void driveToFloor(int destinationFloor){
     /*Safety part*/
-
     /*the driving part*/
     int currentFloor = elevio_floorSensor();
     int difference = destinationFloor - currentFloor;
     MotorDirection direction;
     if(difference > 0){
         direction = 1;
-    }else{
+    }else if(difference < 0){
         direction = -1;
+    }else{
+        direction = 0;
     }
     bool safe = safeToDrive();
+    elevio_motorDirection(direction);
+
     while(difference != 0 && safe){
-        elevio_motorDirection(direction);
         currentFloor = elevio_floorSensor();
-        difference = destinationFloor - currentFloor;
+        if(currentFloor > -1){
+            difference = destinationFloor - currentFloor;
+        }
         safe = safeToDrive();
     }
+    elevio_motorDirection(0);
 }
 
 
