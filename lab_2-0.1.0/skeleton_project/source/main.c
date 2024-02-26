@@ -93,7 +93,7 @@ void executeOrder(){
     int index;
     int currentFloor = elevio_floorSensor();
 
-    /*Iterates through the order array and picks an order to execute*/
+    /*Iterates through the order array and picks an order to execute.*/
     for (int i = 0; i < 10; i++) {
         if(totalOrders[i][0] != -1){
             targetFloor = totalOrders[i][0];
