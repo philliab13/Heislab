@@ -62,7 +62,7 @@ int addOrder(floor, button){
         }
     }
 }
-/*Denne skal slette elementet på index i arrayen og flytte alt bak et hakk mot venstre test */
+/*Denne skal slette elementet på index i arrayen og flytte alt bak et hakk mot venstre  */
 void deleteOrder(int indexInArray){
     for(int i=0; i<10; i++){
         printf("ordre før: %d, %d\n", totalOrders[i][0], totalOrders[i][1]);
