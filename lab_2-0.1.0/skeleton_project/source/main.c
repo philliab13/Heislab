@@ -17,6 +17,7 @@ int elevatorReady();
 void driveToFloor(int);
 void allFloorLightsOff();
 void executeOrder();
+void stopAtFloor(int);
 
 /*end of declerations*/
 
@@ -88,7 +89,7 @@ void deleteOrder(int indexInArray){
 }
 
 void executeOrder(){
-    int targetFloor;
+    int targetFloor[3]={-1,-1,-1};
     int button;
     int index;
     int currentFloor = elevio_floorSensor();
@@ -96,20 +97,25 @@ void executeOrder(){
     /*Iterates through the order array and picks an order to execute.*/
     for (int i = 0; i < 10; i++) {
         if(totalOrders[i][0] != -1){
-            targetFloor = totalOrders[i][0];
+            targetFloor[0] = totalOrders[i][0];
             button = totalOrders[i][1];
             index = i;
         }
     }
     /*this part is for the logic og the up and down buttons outside the elevator*/
         /*Checking if the order is from the same floor as the elevator, if it is we can open the door*/
-        if(currentFloor == targetFloor){
+        if(currentFloor == targetFloor[0]){
             openDoor();
             deleteOrder(index);
         }
         /*Finding out if the floor difference is more than 1, if it is we need to check if there are any floors we should stop by*/
-        if(abs(currentFloor - targetFloor) > 1){
-
+        if(abs(currentFloor - targetFloor[0]) > 1){
+             for (int i = 0; i < 10; i++) {
+               if((totalOrders[i][1]==button) && ((totalOrders[i][0]==currentFloor) || (totalOrders[i][0]<targetFloor))){
+                
+                
+               }
+        }
         }
 
 
