@@ -5,9 +5,10 @@
 #include "driver/elevio.h"
 #include <stdbool.h>
 #include <unistd.h>
+
 /*Global variables*/
 bool isDoorOpen = false;
-int totalOrders[10][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
+int totalOrders[10][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{1,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
 
 
 /*Declaring functions so the layout does not matter*/
@@ -15,6 +16,7 @@ bool safeToDrive();
 int elevatorReady();
 void driveToFloor(int);
 void allFloorLightsOff();
+void executeOrder();
 
 /*end of declerations*/
 
@@ -29,7 +31,14 @@ typedef struct{
 
 int elevatorReady(){
     while(true){
-        /*f iterates the different floors 0-3, b iterates the different buttontypes on that floor*/
+       
+        executeOrder();
+    }
+    return 0;
+}
+
+void searchOrders(){
+     /*f iterates the different floors 0-3, b iterates the different buttontypes on that floor*/
         for(int f = 0; f < N_FLOORS; f++){
             for(int b = 0; b < N_BUTTONS; b++){
                 int btnPressed = elevio_callButton(f, b);
@@ -40,10 +49,8 @@ int elevatorReady(){
                 }
             }
         }
-        executeOrder();
-    }
-    return 0;
 }
+
 /*Need failsafe for identical orders*/
 int addOrder(floor, button){
     /*Looking for the first empty spot in the array to insert the new order*/
@@ -54,6 +61,30 @@ int addOrder(floor, button){
             break;
         }
     }
+}
+/*Denne skal slette elementet på index i arrayen og flytte alt bak et hakk mot venstre */
+void deleteOrder(int indexInArray){
+    for(int i=0; i<10; i++){
+        printf("ordre før: %d, %d\n", totalOrders[i][0], totalOrders[i][1]);
+    }
+    for( int i =0; i<2; i++){
+        
+        totalOrders[indexInArray][i]=-1;
+    }
+
+    for(int i = indexInArray; i<9; i++)
+    {
+        totalOrders[i][0]=totalOrders[i+1][0];
+        totalOrders[i][1]=totalOrders[i+1][1];
+    }
+    totalOrders[9][0]=-1;
+    totalOrders[9][1]=-1;
+    printf("-------------------------\n");
+    for(int i=0; i<10; i++){
+        printf("ordre før: %d, %d\n", totalOrders[i][0], totalOrders[i][1]);
+    }
+    
+    
 }
 
 void executeOrder(){
@@ -98,7 +129,12 @@ void executeOrder(){
 int main(){
     elevio_init();
 
-    startUp();
+   /*  startUp(); */
+
+   deleteOrder(2);
+
+    
+
 
     while (true) {}
 
