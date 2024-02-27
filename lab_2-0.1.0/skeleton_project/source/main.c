@@ -88,30 +88,121 @@ void deleteOrder(int indexInArray){
     
 }
 
-void executeOrder(){
-    int targetFloor[3]={-1,-1,-1};
-    int button;
-    int index;
-    int currentFloor = elevio_floorSensor();
-
-    /*Iterates through the order array and picks an order to execute.*/
-    for (int i = 0; i < 10; i++) {
-        if(totalOrders[i][0] != -1){
-            targetFloor[0] = totalOrders[i][0];
-            button = totalOrders[i][1];
-            index = i;
+/*This function checks the totalOrder array and checks if there are any orders going the same direction on passing floors*/
+/*defyning that going up equals a positive number for direction*/
+int checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, int *index ){
+    int direction = targetFloor[0] - currentFloor;
+    int counter = 1;
+    if(direction > 1){
+        for (int i = 0; i < 10; i++) {
+            if((totalOrders[i][1] == 0) && ((totalOrders[i][0]==currentFloor) || (totalOrders[i][0]<targetFloor))){
+                targetFloor[counter] = totalOrders[i];
+                ++counter;
+                index[counter] = i;
+            }
+        }
+    }else if(direction <= -1){
+        for (int i = 0; i < 10; i++) {
+            /*Need to check the logic for this if-test*/
+            if((totalOrders[i][1] == 1) && ((totalOrders[i][0]==currentFloor) || (totalOrders[i][0]>targetFloor))){
+                targetFloor[counter] = totalOrders[i];
+                ++counter;
+                index[counter] = i;
+            }
         }
     }
+    return targetFloor;
+}
+
+/*This function is for finding the right floor to drive the elevator to first*/
+/*This was created by chatGPT -> remember for report*/
+int findSmallestFloor(int targetFloors[]) {
+    int smallestFloor = 5; 
+    for (int i = 0; i < 4; ++i) {
+        if (targetFloors[i] != -1) { // Check if the value is not -1
+            if (targetFloors[i] < smallestFloor) {
+                smallestFloor = targetFloors[i]; // Update smallestFloor if found a smaller value
+            }
+        }
+    }
+    return smallestFloor;
+}
+
+void executeOrder(){
+    int targetFloor[3]={-1,-1,-1};
+    int typeOfButton;
+    int index[3] = {-1,-1,-1};
+    int currentFloor = elevio_floorSensor();
+    bool foundOrder = false;
+
+
+/*Iterates through the order array and picks an order to execute.*/
+/*In this loop we are looking for orders from inside the elevator, these are prioritized*/
+/*Sets foundOder = true so that we don't look for more orders once one is found*/
+    for (int i = 0; i < 10; ++i) {
+        if((totalOrders[i][0] != -1) && (totalOrders[i][1] == 2)){
+            targetFloor[0] = totalOrders[i][0];
+            typeOfButton = totalOrders[i][1];
+            index[0] = i;
+            foundOrder = true;
+        }
+    }
+/*This section is for handling orders when they come from inside the cab*/
+    if(foundOrder){
+        if(currentFloor == targetFloor[0]){
+            openDoor();
+            deleteOrder(index[0]);
+        }
+
+        for (int i = 0; i < 4; ++i) {  
+            targetFloor[i] = checkPassingFloors(targetFloor, currentFloor, typeOfButton, &index);
+        }
+    /*We should now have an main order to execute and all the floors worth stopping by in the array targetFloor*/
+    /*The elevator can now drive to the target floors, when it has stopped by all of them the order is completed*/
+        for(int i = 0; i < 3; ++i){
+            if (targetFloor[i] != -1){
+                closeDoor();
+                driveToFloor(findSmallestFloor(targetFloor));
+                openDoor();
+                deleteOrder()
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+    }
+/*this section is for handling orders from outside the cab*/
+    else{
+        /*Iterates through the order array and picks an order to execute.*/
+        /*This loop should only be able to pick orders from outside the cab*/
+        for (int i = 0; i < 10; i++) {
+            if(totalOrders[i][0] != -1){
+                targetFloor[0] = totalOrders[i][0];
+                typeOfButton = totalOrders[i][1];
+                index = i;
+            }
+        }
+    }
+
     /*this part is for the logic og the up and down buttons outside the elevator*/
         /*Checking if the order is from the same floor as the elevator, if it is we can open the door*/
         if(currentFloor == targetFloor[0]){
             openDoor();
             deleteOrder(index);
         }
+
         /*Finding out if the floor difference is more than 1, if it is we need to check if there are any floors we should stop by*/
         if(abs(currentFloor - targetFloor[0]) > 1){
              for (int i = 0; i < 10; i++) {
-               if((totalOrders[i][1]==button) && ((totalOrders[i][0]==currentFloor) || (totalOrders[i][0]<targetFloor))){
+               if((totalOrders[i][1]==typeOfButton) && ((totalOrders[i][0]==currentFloor) || (totalOrders[i][0]<targetFloor))){
                 
                 
                }
@@ -168,7 +259,6 @@ void startUp(){
 
 void driveToFloor(int destinationFloor){
     /*Safety part*/
-    elevio_floorIndicator(2);
     /*the driving part*/
     int currentFloor = elevio_floorSensor();
     int difference = destinationFloor - currentFloor;
@@ -192,7 +282,6 @@ void driveToFloor(int destinationFloor){
 
         /*Updating the lights*/
     }
-    elevio_motorDirection(0);
     elevio_motorDirection(0);
 }
 
