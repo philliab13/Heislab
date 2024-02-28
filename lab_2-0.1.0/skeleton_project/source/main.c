@@ -38,6 +38,7 @@ int elevatorReady(){
     return 0;
 }
 
+/*Scans all the buttons to see if any of them are pressed in that instance, if yes call addOrder*/
 void searchOrders(){
      /*f iterates the different floors 0-3, b iterates the different buttontypes on that floor*/
         for(int f = 0; f < N_FLOORS; f++){
@@ -52,6 +53,7 @@ void searchOrders(){
         }
 }
 
+/*Add the order detected from searchOrders to the global array totalOrders*/
 /*Need failsafe for identical orders*/
 int addOrder(floor, button){
     /*Looking for the first empty spot in the array to insert the new order*/
@@ -63,6 +65,7 @@ int addOrder(floor, button){
         }
     }
 }
+
 /*Denne skal slette elementet på index i arrayen og flytte alt bak et hakk mot venstre  */
 void deleteOrder(int indexInArray){
     for(int i=0; i<10; i++){
@@ -89,6 +92,7 @@ void deleteOrder(int indexInArray){
 }
 
 /*This function checks the totalOrder array and checks if there are any orders going the same direction on passing floors*/
+/*If yes, updates the arrays targetFloor with what floor the order is on and index for location in totalOrder*/
 /*defyning that going up equals a positive number for direction*/
 void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, int index[] ){
     int direction = targetFloor[0] - currentFloor;
