@@ -228,7 +228,7 @@ int main(){
 
    /*  startUp(); */
 
-   deleteOrder(2);
+   
 
     
 
