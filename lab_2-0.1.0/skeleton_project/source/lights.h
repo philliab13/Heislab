@@ -7,4 +7,5 @@
 
 // Declerations
 
+void obstructionActiveLamp();
 void stopLamp();
