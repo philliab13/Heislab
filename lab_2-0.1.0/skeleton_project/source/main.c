@@ -32,7 +32,6 @@ typedef struct{
 
 int elevatorReady(){
     while(true){
-       
         executeOrder();
     }
     return 0;
@@ -131,6 +130,15 @@ int findSmallestFloor(int targetFloors[]) {
     return smallestFloor;
 }
 
+int findOrder(int floor){
+    for (int i = 0; i < 10; ++i) {
+        if((totalOrders[i][0] != floor) && (totalOrders[i][1] == 2)){
+            return i;
+        }
+    }
+    return -1;
+}
+
 void executeOrder(){
     int targetFloor[3]={-1,-1,-1};
     int typeOfButton;
@@ -165,15 +173,14 @@ void executeOrder(){
                 closeDoor();
                 driveToFloor(findSmallestFloor(targetFloor));
                 openDoor();
-                deleteOrder()
+                deleteOrder(index[i]);
+                int passBy = findOrder(targetFloor[i]);
+                if(passBy != -1){
+                    deleteOrder(passBy);
+                }
+                closeDoor();
             }
         }
-
-
-
-
-
-
 
 
 
