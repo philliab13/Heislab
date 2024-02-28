@@ -130,6 +130,7 @@ int findSmallestFloor(int targetFloors[]) {
     return smallestFloor;
 }
 
+/*Find if there happens to be an order for the floor we are stopping at*/
 int findOrder(int floor){
     for (int i = 0; i < 10; ++i) {
         if((totalOrders[i][0] != floor) && (totalOrders[i][1] == 2)){
@@ -145,7 +146,6 @@ void executeOrder(){
     int index[3] = {-1,-1,-1};
     int currentFloor = elevio_floorSensor();
     bool foundOrder = false;
-
 
 /*Iterates through the order array and picks an order to execute.*/
 /*In this loop we are looking for orders from inside the elevator, these are prioritized*/
@@ -163,6 +163,7 @@ void executeOrder(){
         if(currentFloor == targetFloor[0]){
             openDoor();
             deleteOrder(index[0]);
+            closeDoor();
         }
         checkPassingFloors(targetFloor, currentFloor, typeOfButton, index);
         
@@ -181,50 +182,28 @@ void executeOrder(){
                 closeDoor();
             }
         }
-
-
-
-
-
     }
+
 /*this section is for handling orders from outside the cab*/
     else{
-        /*Iterates through the order array and picks an order to execute.*/
-        /*This loop should only be able to pick orders from outside the cab*/
+    /*Iterates through the order array and picks an order to execute.*/
+    /*This loop should only be able to pick orders from outside the cab*/
         for (int i = 0; i < 10; i++) {
             if(totalOrders[i][0] != -1){
                 targetFloor[0] = totalOrders[i][0];
                 typeOfButton = totalOrders[i][1];
-                index = i;
+                index[0] = i;
+                foundOrder = true;
             }
         }
-    }
-
-    /*this part is for the logic og the up and down buttons outside the elevator*/
-        /*Checking if the order is from the same floor as the elevator, if it is we can open the door*/
-        if(currentFloor == targetFloor[0]){
+        if(foundOrder){
+            closeDoor();
+            driveToFloor(findSmallestFloor(targetFloor));
             openDoor();
-            deleteOrder(index);
+            deleteOrder(index[0]);
+            closeDoor();
         }
-
-        /*Finding out if the floor difference is more than 1, if it is we need to check if there are any floors we should stop by*/
-        if(abs(currentFloor - targetFloor[0]) > 1){
-             for (int i = 0; i < 10; i++) {
-               if((totalOrders[i][1]==typeOfButton) && ((totalOrders[i][0]==currentFloor) || (totalOrders[i][0]<targetFloor))){
-                
-                
-               }
-        }
-        }
-
-
-
-
-
-    /*check if the order is coming from the floor the elevator is*/
-    /*Logic to find out if there are any orders on the way the elevator should pick up*/
-
-    
+    } 
 }
 
 
