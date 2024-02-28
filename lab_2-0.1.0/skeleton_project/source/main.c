@@ -36,20 +36,23 @@ int elevatorReady()
 }
 
 /*Scans all the buttons to see if any of them are pressed in that instance, if yes call addOrder*/
-void searchOrders(){
-     /*f iterates the different floors 0-3, b iterates the different buttontypes on that floor*/
-        for(int f = 0; f < N_FLOORS; f++){
-            for(int b = 0; b < N_BUTTONS; b++){
-                int btnPressed = elevio_callButton(f, b);
-                elevio_buttonLamp(f, b, btnPressed);
-                /*add order*/
-                if(btnPressed){
-                    addOrder(f,b);
-                }
-
+void searchOrders()
+{
+    /*f iterates the different floors 0-3, b iterates the different buttontypes on that floor*/
+    for (int f = 0; f < N_FLOORS; f++)
+    {
+        for (int b = 0; b < N_BUTTONS; b++)
+        {
+            int btnPressed = elevio_callButton(f, b);
+            elevio_buttonLamp(f, b, btnPressed);
+            /*add order*/
+            if (btnPressed)
+            {
+                addOrder(f, b);
             }
         }
     }
+}
 }
 
 /*Add the order detected from searchOrders to the global array totalOrders*/
@@ -99,7 +102,8 @@ void deleteOrder(int indexInArray)
 /*If yes, updates the arrays targetFloor with what floor the order is on and index for location in totalOrder*/
 /*defyning that going up equals a positive number for direction*/
 
-void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, int index[] ){
+void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, int index[])
+{
 
     int direction = targetFloor[0] - currentFloor;
     int counter = 1;
@@ -148,31 +152,35 @@ int findSmallestFloor(int targetFloors[])
     return smallestFloor;
 }
 
-
 /*Find if there happens to be an order for the floor we are stopping at*/
-int findOrder(int floor){
-    for (int i = 0; i < 10; ++i) {
-        if((totalOrders[i][0] != floor) && (totalOrders[i][1] == 2)){
+int findOrder(int floor)
+{
+    for (int i = 0; i < 10; ++i)
+    {
+        if ((totalOrders[i][0] != floor) && (totalOrders[i][1] == 2))
+        {
             return i;
         }
     }
     return -1;
 }
 
-void executeOrder(){
-    int targetFloor[3]={-1,-1,-1};
+void executeOrder()
+{
+    int targetFloor[3] = {-1, -1, -1};
 
     int typeOfButton;
     int index[3] = {-1, -1, -1};
     int currentFloor = elevio_floorSensor();
     bool foundOrder = false;
 
-
-/*Iterates through the order array and picks an order to execute.*/
-/*In this loop we are looking for orders from inside the elevator, these are prioritized*/
-/*Sets foundOder = true so that we don't look for more orders once one is found*/
-    for (int i = 0; i < 10; ++i) {
-        if((totalOrders[i][0] != -1) && (totalOrders[i][1] == 2)){
+    /*Iterates through the order array and picks an order to execute.*/
+    /*In this loop we are looking for orders from inside the elevator, these are prioritized*/
+    /*Sets foundOder = true so that we don't look for more orders once one is found*/
+    for (int i = 0; i < 10; ++i)
+    {
+        if ((totalOrders[i][0] != -1) && (totalOrders[i][1] == 2))
+        {
 
             targetFloor[0] = totalOrders[i][0];
             typeOfButton = totalOrders[i][1];
@@ -192,11 +200,13 @@ void executeOrder(){
         }
 
         checkPassingFloors(targetFloor, currentFloor, typeOfButton, index);
-        
-    /*We should now have an main order to execute and all the floors worth stopping by in the array targetFloor*/
-    /*The elevator can now drive to the target floors, when it has stopped by all of them the order is completed*/
-        for(int i = 0; i < 3; ++i){
-            if (targetFloor[i] != -1){
+
+        /*We should now have an main order to execute and all the floors worth stopping by in the array targetFloor*/
+        /*The elevator can now drive to the target floors, when it has stopped by all of them the order is completed*/
+        for (int i = 0; i < 3; ++i)
+        {
+            if (targetFloor[i] != -1)
+            {
 
                 closeDoor();
                 elevio_doorOpenLamp(0);
@@ -205,7 +215,8 @@ void executeOrder(){
 
                 deleteOrder(index[i]);
                 int passBy = findOrder(targetFloor[i]);
-                if(passBy != -1){
+                if (passBy != -1)
+                {
                     deleteOrder(passBy);
                 }
                 closeDoor();
@@ -213,12 +224,15 @@ void executeOrder(){
         }
     }
 
-/*this section is for handling orders from outside the cab*/
-    else{
-    /*Iterates through the order array and picks an order to execute.*/
-    /*This loop should only be able to pick orders from outside the cab*/
-        for (int i = 0; i < 10; i++) {
-            if(totalOrders[i][0] != -1){
+    /*this section is for handling orders from outside the cab*/
+    else
+    {
+        /*Iterates through the order array and picks an order to execute.*/
+        /*This loop should only be able to pick orders from outside the cab*/
+        for (int i = 0; i < 10; i++)
+        {
+            if (totalOrders[i][0] != -1)
+            {
 
                 targetFloor[0] = totalOrders[i][0];
                 typeOfButton = totalOrders[i][1];
@@ -227,15 +241,15 @@ void executeOrder(){
             }
         }
 
-        if(foundOrder){
+        if (foundOrder)
+        {
             closeDoor();
             driveToFloor(findSmallestFloor(targetFloor));
             openDoor();
             deleteOrder(index[0]);
             closeDoor();
         }
-    } 
-
+    }
 }
 
 int main()
