@@ -90,7 +90,7 @@ void deleteOrder(int indexInArray){
 
 /*This function checks the totalOrder array and checks if there are any orders going the same direction on passing floors*/
 /*defyning that going up equals a positive number for direction*/
-int checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, int *index ){
+void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, int index[] ){
     int direction = targetFloor[0] - currentFloor;
     int counter = 1;
     if(direction > 1){
@@ -111,7 +111,6 @@ int checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, in
             }
         }
     }
-    return targetFloor;
 }
 
 /*This function is for finding the right floor to drive the elevator to first*/
@@ -153,10 +152,8 @@ void executeOrder(){
             openDoor();
             deleteOrder(index[0]);
         }
-
-        for (int i = 0; i < 4; ++i) {  
-            targetFloor[i] = checkPassingFloors(targetFloor, currentFloor, typeOfButton, &index);
-        }
+        checkPassingFloors(targetFloor, currentFloor, typeOfButton, index);
+        
     /*We should now have an main order to execute and all the floors worth stopping by in the array targetFloor*/
     /*The elevator can now drive to the target floors, when it has stopped by all of them the order is completed*/
         for(int i = 0; i < 3; ++i){
