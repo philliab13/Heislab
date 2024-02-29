@@ -88,6 +88,7 @@ void deleteOrder(int indexInArray)
     {
 
         totalOrders[indexInArray][i] = -1;
+        elevio_floorIndicator(indexInArray);
     }
 
     for (int i = indexInArray; i < 9; i++)
