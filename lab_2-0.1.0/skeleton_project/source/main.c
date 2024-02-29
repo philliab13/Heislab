@@ -232,14 +232,13 @@ for (int i = 0; i < 10; ++i) {
         {
             if (targetFloor[i] != -1)
             {
-
                 closeDoor();
                 elevio_doorOpenLamp(0);
                 driveToFloor(findNearestFloor(targetFloor, currentFloor));
                 openDoor();
 
-                deleteOrder(index[i]);
-                int passBy = findOrder(targetFloor[i]);
+                //deleteOrder(index[i]);
+                int passBy = findOrder(currentFloor);
                 if (passBy != -1)
                 {
                     deleteOrder(passBy);
