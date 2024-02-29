@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include "lights.h"
+#include <time.h>
+
 
 /*Global variables*/
 bool isDoorOpen = false;
@@ -202,7 +204,8 @@ void executeOrder(){
 /*Iterates through the order array and picks an order to execute.*/
 /*In this loop we are looking for orders from inside the elevator, these are prioritized*/
 /*Sets foundOder = true so that we don't look for more orders once one is found*/
-    for (int i = 0; i < 10; ++i) {
+        elevio_motorDirection(0);
+for (int i = 0; i < 10; ++i) {
         if((totalOrders[i][0] != -1) && (totalOrders[i][1] == 2)){
 
             targetFloor[0] = totalOrders[i][0];
@@ -284,10 +287,6 @@ int main()
     while (true) {
         searchOrders();
         executeOrder();
-        obstructionActiveLamp();
-        stopLamp();
-        nanosleep(&(struct timespec){0, 20*1000*1000}, NULL);
-
     }
 
     return 0;
@@ -314,8 +313,7 @@ void startUp()
     elevatorReady();
 }
 
-void driveToFloor(int destinationFloor)
-{
+void driveToFloor(int destinationFloor){
     /*Safety part*/
     /*the driving part*/
     int currentFloor = elevio_floorSensor();
@@ -333,17 +331,18 @@ void driveToFloor(int destinationFloor)
     {
         direction = 0;
     }
-    bool safe = safeToDrive();
     elevio_motorDirection(direction);
-    while (difference != 0 && safe)
-    {
-
+    bool safe = safeToDrive();
+    while (difference != 0 && safe){
+        searchOrders();
         currentFloor = elevio_floorSensor();
-        if (currentFloor > -1)
+        if (currentFloor == destinationFloor)
         {
-            difference = destinationFloor - currentFloor;
+            // difference = destinationFloor - currentFloor;
+            elevio_motorDirection(0);
+            break;
         }
-        safe = safeToDrive();
+        // safe = safeToDrive();
 
         /*Updating the lights*/
     }
@@ -362,14 +361,27 @@ void allFloorLightsOff()
 int openDoor()
 {
     int floor = elevio_floorSensor();
+
+    time_t start, end;
+    
     /*checking if it safe to open door*/
-    if (floor > 0)
-    {
+    if (floor > 0){
         /*Update global variable to door is open*/
         isDoorOpen = true;
         /*set open door light on*/
-        nanosleep(&(struct timespec){0, 20 * 1000 * 1000}, NULL);
-        sleep(3);
+        elevio_doorOpenLamp(1);
+        /*Keeps the door open for 3 seconds, and searches for orders at the same time*/
+        /*This is created by chat-gpt -> for report*/
+        time(&start);
+        while(true){
+            printf("kjorer \n");
+            time(&end);
+            if(difftime(end,start) >= 3.0){
+                break;
+            }
+            searchOrders();
+        }
+        
         return 1;
     }
     else
