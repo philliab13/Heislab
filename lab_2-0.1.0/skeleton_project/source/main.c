@@ -5,6 +5,7 @@
 #include "driver/elevio.h"
 #include <stdbool.h>
 #include <unistd.h>
+#include "lights.h"
 
 /*Global variables*/
 bool isDoorOpen = false;
@@ -43,13 +44,10 @@ int elevatorReady()
 }
 
 /*Scans all the buttons to see if any of them are pressed in that instance, if yes call addOrder*/
-void searchOrders()
-{
+void searchOrders(){
     /*f iterates the different floors 0-3, b iterates the different buttontypes on that floor*/
-    for (int f = 0; f < N_FLOORS; f++)
-    {
-        for (int b = 0; b < N_BUTTONS; b++)
-        {
+    for (int f = 0; f < N_FLOORS; f++){
+        for (int b = 0; b < N_BUTTONS; b++){
             int btnPressed = elevio_callButton(f, b);
             elevio_buttonLamp(f, b, btnPressed);
             /*add order*/
@@ -60,7 +58,7 @@ void searchOrders()
         }
     }
 }
-}
+
 
 /*Add the order detected from searchOrders to the global array totalOrders*/
 /*Need failsafe for identical orders*/
@@ -282,12 +280,12 @@ void executeOrder(){
 int main()
 {
     elevio_init();
-
-
    /*  startUp(); */
     while (true) {
         searchOrders();
         executeOrder();
+        obstructionActiveLamp();
+        stopLamp();
         nanosleep(&(struct timespec){0, 20*1000*1000}, NULL);
 
     }
@@ -403,6 +401,9 @@ bool safeToDrive()
     bool stopButton = elevio_stopButton();
     return !isDoorOpen && !stopButton;
 }
+
+
+
 
 /*
 int main(){
