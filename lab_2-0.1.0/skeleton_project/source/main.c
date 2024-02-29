@@ -282,10 +282,16 @@ for (int i = 0; i < 10; ++i) {
 int main()
 {
     elevio_init();
+    
    /*  startUp(); */
     while (true) {
         searchOrders();
         executeOrder();
+
+        /* if(elevio_stopButton()){
+            elevio_motorDirection(DIRN_STOP);
+            break;
+        } */
     }
 
     return 0;
