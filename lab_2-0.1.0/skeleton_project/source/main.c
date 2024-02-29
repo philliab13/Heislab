@@ -348,12 +348,10 @@ void driveToFloor(int destinationFloor){
             elevio_motorDirection(0);
             break;
         }
-        // safe = safeToDrive();
+        safe = safeToDrive();
 
         /*Updating the lights*/
-    }
-    elevio_motorDirection(0);
-     switch (currentFloor)
+        switch (currentFloor)
         {
         case 0:
             elevio_floorIndicator(0);
@@ -371,6 +369,27 @@ void driveToFloor(int destinationFloor){
         default:
             break;
         }
+    }
+    elevio_motorDirection(0);
+    switch (currentFloor)
+        {
+        case 0:
+            elevio_floorIndicator(0);
+            break;
+        case 1:
+        elevio_floorIndicator(1);
+        break;
+        case 2:
+            elevio_floorIndicator(2);
+            break;
+        case 3:
+            elevio_floorIndicator(3);
+            break;
+        
+        default:
+            break;
+        }
+     
 }
 
 void allFloorLightsOff()
