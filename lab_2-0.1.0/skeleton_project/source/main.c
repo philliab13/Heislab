@@ -84,31 +84,23 @@ void addOrder(floor, button){
 }
 
 /*Denne skal slette elementet på index i arrayen og flytte alt bak et hakk mot venstre  */
-void deleteOrder(int indexInArray)
-{
-    for (int i = 0; i < 10; i++)
-    {
-        printf("ordre før: %d, %d\n", totalOrders[i][0], totalOrders[i][1]);
-    }
-    elevio_buttonLamp(totalOrders[indexInArray][0],totalOrders[indexInArray][1], 0);
-    for (int i = 0; i < 2; i++)
-    {   
+
+void deleteOrder(int indexInArray){
+    /*
+    for (int i = 0; i < 2; i++)    {
+
         totalOrders[indexInArray][i] = -1;
         elevio_floorIndicator(indexInArray);
     }
+    */
+    elevio_buttonLamp(totalOrders[indexInArray][0], totalOrders[indexInArray][1], 0);
 
-    for (int i = indexInArray; i < 9; i++)
-    {
+    for (int i = indexInArray; i < 9; i++){
         totalOrders[i][0] = totalOrders[i + 1][0];
         totalOrders[i][1] = totalOrders[i + 1][1];
     }
     totalOrders[9][0] = -1;
     totalOrders[9][1] = -1;
-    printf("-------------------------\n");
-    for (int i = 0; i < 10; i++)
-    {
-        printf("ordre før: %d, %d\n", totalOrders[i][0], totalOrders[i][1]);
-    }
 }
 
 /*This function checks the totalOrder array and checks if there are any orders going the same direction on passing floors*/
