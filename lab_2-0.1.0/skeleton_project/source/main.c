@@ -51,7 +51,6 @@ void searchOrders(){
     for (int f = 0; f < N_FLOORS; f++){
         for (int b = 0; b < N_BUTTONS; b++){
             int btnPressed = elevio_callButton(f, b);
-            elevio_buttonLamp(f, b, btnPressed);
             /*add order*/
             if (btnPressed)
             {
@@ -85,10 +84,13 @@ void addOrder(floor, button){
 }
 
 /*Denne skal slette elementet på index i arrayen og flytte alt bak et hakk mot venstre  */
+
 void deleteOrder(int indexInArray){
     /*
     for (int i = 0; i < 2; i++)    {
+
         totalOrders[indexInArray][i] = -1;
+        elevio_floorIndicator(indexInArray);
     }
     */
     elevio_buttonLamp(totalOrders[indexInArray][0], totalOrders[indexInArray][1], 0);
