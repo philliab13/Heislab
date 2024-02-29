@@ -8,7 +8,10 @@
 
 /*Global variables*/
 bool isDoorOpen = false;
-int totalOrders[10][2] = {{-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}, {1, 1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}};
+
+int totalOrders[10][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
+
+
 
 /*Declaring functions so the layout does not matter*/
 bool safeToDrive();
@@ -17,6 +20,10 @@ void driveToFloor(int);
 void allFloorLightsOff();
 void executeOrder();
 void stopAtFloor(int);
+void addOrder(int, int);
+int openDoor();
+int closeDoor();
+
 
 /*end of declerations*/
 
@@ -57,13 +64,12 @@ void searchOrders()
 
 /*Add the order detected from searchOrders to the global array totalOrders*/
 /*Need failsafe for identical orders*/
-int addOrder(floor, button)
-{
+
+void addOrder(floor, button){
     /*Looking for the first empty spot in the array to insert the new order*/
-    for (int i = 0; i < 10; i++)
-    {
-        if (totalOrders[i][0] = -1)
-        {
+    for (int i = 0; i < 10; i++) {
+        if(totalOrders[i][0] == -1){
+
             totalOrders[i][0] = floor;
             totalOrders[i][1] = button;
             break;
@@ -107,13 +113,12 @@ void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, i
 
     int direction = targetFloor[0] - currentFloor;
     int counter = 1;
-    if (direction > 1)
-    {
-        for (int i = 0; i < 10; i++)
-        {
-            if ((totalOrders[i][1] == 0) && ((totalOrders[i][0] == currentFloor) || (totalOrders[i][0] < targetFloor)))
-            {
-                targetFloor[counter] = totalOrders[i];
+
+    if(direction > 1){
+        for (int i = 0; i < 10; i++) {
+            if((totalOrders[i][1] == 0) && ((totalOrders[i][0]==currentFloor) || (totalOrders[i][0]<targetFloor[i]))){
+                targetFloor[counter] = totalOrders[i][0];
+
                 ++counter;
                 index[counter] = i;
             }
@@ -124,9 +129,10 @@ void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, i
         for (int i = 0; i < 10; i++)
         {
             /*Need to check the logic for this if-test*/
-            if ((totalOrders[i][1] == 1) && ((totalOrders[i][0] == currentFloor) || (totalOrders[i][0] > targetFloor)))
-            {
-                targetFloor[counter] = totalOrders[i];
+
+            if((totalOrders[i][1] == 1) && ((totalOrders[i][0]==currentFloor) || (totalOrders[i][0]>targetFloor[i]))){
+                targetFloor[counter] = totalOrders[i][0];
+
                 ++counter;
                 index[counter] = i;
             }
@@ -136,21 +142,24 @@ void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, i
 
 /*This function is for finding the right floor to drive the elevator to first*/
 /*This was created by chatGPT -> remember for report*/
-int findSmallestFloor(int targetFloors[])
-{
-    int smallestFloor = 5;
-    for (int i = 0; i < 4; ++i)
-    {
-        if (targetFloors[i] != -1)
-        { // Check if the value is not -1
-            if (targetFloors[i] < smallestFloor)
-            {
+
+int findSmallestFloor(int targetFloors[]) {
+    int placement;
+    int smallestFloor = 5; 
+    for (int i = 0; i < 3; ++i) {
+        if (targetFloors[i] != -1) { // Check if the value is not -1
+            if (targetFloors[i] < smallestFloor) {
+
                 smallestFloor = targetFloors[i]; // Update smallestFloor if found a smaller value
+                placement = i;
             }
         }
     }
+    targetFloors[placement] = -1;
     return smallestFloor;
 }
+/*TODO: create findNearestFloor*/
+
 
 /*Find if there happens to be an order for the floor we are stopping at*/
 int findOrder(int floor)
@@ -165,27 +174,44 @@ int findOrder(int floor)
     return -1;
 }
 
-void executeOrder()
-{
-    int targetFloor[3] = {-1, -1, -1};
+
+void printArray(int arr[10][2]){
+    int rows = 10;
+    int cols = 2;
+    for(int i = 0; i < rows; i++) {
+        printf("[");
+        for(int j = 0; j < cols; j++) {
+            printf("%d", arr[i][j]);
+            if(j != cols - 1) {
+                printf(", ");
+            }
+        }
+        printf("]\n");
+    }
+}
+
+
+void executeOrder(){
+    int targetFloor[3]={-1,-1,-1};
 
     int typeOfButton;
     int index[3] = {-1, -1, -1};
     int currentFloor = elevio_floorSensor();
     bool foundOrder = false;
 
-    /*Iterates through the order array and picks an order to execute.*/
-    /*In this loop we are looking for orders from inside the elevator, these are prioritized*/
-    /*Sets foundOder = true so that we don't look for more orders once one is found*/
-    for (int i = 0; i < 10; ++i)
-    {
-        if ((totalOrders[i][0] != -1) && (totalOrders[i][1] == 2))
-        {
+
+    printArray(totalOrders);
+/*Iterates through the order array and picks an order to execute.*/
+/*In this loop we are looking for orders from inside the elevator, these are prioritized*/
+/*Sets foundOder = true so that we don't look for more orders once one is found*/
+    for (int i = 0; i < 10; ++i) {
+        if((totalOrders[i][0] != -1) && (totalOrders[i][1] == 2)){
 
             targetFloor[0] = totalOrders[i][0];
             typeOfButton = totalOrders[i][1];
             index[0] = i;
             foundOrder = true;
+            break;
         }
     }
     /*This section is for handling orders when they come from inside the cab*/
@@ -238,6 +264,7 @@ void executeOrder()
                 typeOfButton = totalOrders[i][1];
                 index[0] = i;
                 foundOrder = true;
+                break;
             }
         }
 
@@ -256,10 +283,13 @@ int main()
 {
     elevio_init();
 
-    /*  startUp(); */
 
-    while (true)
-    {
+   /*  startUp(); */
+    while (true) {
+        searchOrders();
+        executeOrder();
+        nanosleep(&(struct timespec){0, 20*1000*1000}, NULL);
+
     }
 
     return 0;
