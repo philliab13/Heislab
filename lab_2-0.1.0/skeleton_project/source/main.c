@@ -142,20 +142,19 @@ void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, i
 /*This function is for finding the right floor to drive the elevator to first*/
 /*This was created by chatGPT -> remember for report*/
 
-int findSmallestFloor(int targetFloors[]) {
+int findNearestFloor(int targetFloors[], int currentFloor){
     int placement;
-    int smallestFloor = 5; 
+    int closest = 10; 
+    int nextFloor;
     for (int i = 0; i < 3; ++i) {
-        if (targetFloors[i] != -1) { // Check if the value is not -1
-            if (targetFloors[i] < smallestFloor) {
-
-                smallestFloor = targetFloors[i]; // Update smallestFloor if found a smaller value
-                placement = i;
-            }
+        if (abs(targetFloors[i] - currentFloor) < closest) { // Check if the value is not -1
+            closest = targetFloors[i] - currentFloor; // Update closest if found a smaller value
+            placement = i;
+            nextFloor = targetFloors[i];
         }
     }
     targetFloors[placement] = -1;
-    return smallestFloor;
+    return nextFloor;
 }
 /*TODO: create findNearestFloor*/
 
@@ -236,7 +235,7 @@ for (int i = 0; i < 10; ++i) {
 
                 closeDoor();
                 elevio_doorOpenLamp(0);
-                driveToFloor(findSmallestFloor(targetFloor));
+                driveToFloor(findNearestFloor(targetFloor, currentFloor));
                 openDoor();
 
                 deleteOrder(index[i]);
@@ -271,7 +270,7 @@ for (int i = 0; i < 10; ++i) {
         if (foundOrder)
         {
             closeDoor();
-            driveToFloor(findSmallestFloor(targetFloor));
+            driveToFloor(targetFloor[0]);
             openDoor();
             deleteOrder(index[0]);
             closeDoor();
