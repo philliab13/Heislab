@@ -66,12 +66,19 @@ void searchOrders(){
 /*Need failsafe for identical orders*/
 
 void addOrder(floor, button){
+    /*First the function checks if the order already exist and ignores it if it does*/
+    for(int i = 0; i < 10; ++i){
+        if(totalOrders[i][0] == floor && totalOrders[i][1] == button){
+            return;
+        }
+    }
     /*Looking for the first empty spot in the array to insert the new order*/
     for (int i = 0; i < 10; i++) {
         if(totalOrders[i][0] == -1){
-
             totalOrders[i][0] = floor;
             totalOrders[i][1] = button;
+        /*Sets the button lamp on for the order*/
+            elevio_buttonLamp(floor, button, 1);
             break;
         }
     }
