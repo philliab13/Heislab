@@ -147,10 +147,12 @@ int findNearestFloor(int targetFloors[], int currentFloor){
     int closest = 10; 
     int nextFloor;
     for (int i = 0; i < 3; ++i) {
-        if (abs(targetFloors[i] - currentFloor) < closest) { // Check if the value is not -1
-            closest = targetFloors[i] - currentFloor; // Update closest if found a smaller value
-            placement = i;
-            nextFloor = targetFloors[i];
+        if(targetFloors[i] != -1){
+            if (abs(targetFloors[i] - currentFloor) < closest) { // Check if the value is not -1
+                closest = targetFloors[i] - currentFloor; // Update closest if found a smaller value
+                placement = i;
+                nextFloor = targetFloors[i];
+            }
         }
     }
     targetFloors[placement] = -1;
@@ -339,6 +341,7 @@ void driveToFloor(int destinationFloor){
     bool safe = safeToDrive();
     while (difference != 0 && safe){
         searchOrders();
+       
         currentFloor = elevio_floorSensor();
         if (currentFloor == destinationFloor)
         {
@@ -351,6 +354,24 @@ void driveToFloor(int destinationFloor){
         /*Updating the lights*/
     }
     elevio_motorDirection(0);
+     switch (currentFloor)
+        {
+        case 0:
+            elevio_floorIndicator(0);
+            break;
+        case 1:
+        elevio_floorIndicator(1);
+        break;
+        case 2:
+            elevio_floorIndicator(2);
+            break;
+        case 3:
+            elevio_floorIndicator(3);
+            break;
+        
+        default:
+            break;
+        }
 }
 
 void allFloorLightsOff()
@@ -369,7 +390,7 @@ int openDoor()
     time_t start, end;
     
     /*checking if it safe to open door*/
-    if (floor > 0){
+    if (floor >= 0){
         /*Update global variable to door is open*/
         isDoorOpen = true;
         /*set open door light on*/
