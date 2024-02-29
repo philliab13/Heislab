@@ -123,14 +123,17 @@ void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, i
 /*This function is for finding the right floor to drive the elevator to first*/
 /*This was created by chatGPT -> remember for report*/
 int findSmallestFloor(int targetFloors[]) {
+    int placement;
     int smallestFloor = 5; 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 3; ++i) {
         if (targetFloors[i] != -1) { // Check if the value is not -1
             if (targetFloors[i] < smallestFloor) {
                 smallestFloor = targetFloors[i]; // Update smallestFloor if found a smaller value
+                placement = i;
             }
         }
     }
+    targetFloors[placement] = -1;
     return smallestFloor;
 }
 /*TODO: create findNearestFloor*/
@@ -179,6 +182,7 @@ void executeOrder(){
             typeOfButton = totalOrders[i][1];
             index[0] = i;
             foundOrder = true;
+            break;
         }
     }
 /*This section is for handling orders when they come from inside the cab*/
@@ -217,6 +221,7 @@ void executeOrder(){
                 typeOfButton = totalOrders[i][1];
                 index[0] = i;
                 foundOrder = true;
+                break;
             }
         }
         if(foundOrder){
