@@ -91,6 +91,8 @@ void deleteOrder(int indexInArray){
         totalOrders[indexInArray][i] = -1;
     }
     */
+    elevio_buttonLamp(totalOrders[indexInArray][0], totalOrders[indexInArray][1], 0);
+
     for (int i = indexInArray; i < 9; i++){
         totalOrders[i][0] = totalOrders[i + 1][0];
         totalOrders[i][1] = totalOrders[i + 1][1];
