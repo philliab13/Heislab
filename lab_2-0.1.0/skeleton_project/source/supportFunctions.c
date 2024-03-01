@@ -1,5 +1,5 @@
 #include <Supportfunctions.h>
-extern bool isDoorOpen = false;
+extern bool isDoorOpen;
 
 
 
@@ -74,13 +74,12 @@ void startUp(){
     if (onFloor == -1){
         driveUp(onFloor);
     }
-    elevatorReady();
+    //elevatorReady();
 }
 
 void driveUp(int onFloor){
-    MotorDirection direction = 1;
-    elevio_motorDirection(direction);
-    while (onFloor == -1){
+    elevio_motorDirection(1);
+    while(onFloor == -1){
         onFloor = elevio_floorSensor();
     }
     elevio_motorDirection(0);

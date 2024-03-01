@@ -36,12 +36,12 @@ typedef struct
     int direction;
 } elevatorOrder;
 
-int elevatorReady(){
-    while (true)    {
-        executeOrder();
-    }
-    return 0;
-}
+// int elevatorReady(){
+//     while (true)    {
+//         executeOrder();
+//     }
+//     return 0;
+// }
 
 /*Scans all the buttons to see if any of them are pressed in that instance, if yes call addOrder*/
 void searchOrders(){
@@ -81,8 +81,9 @@ void addOrder(floor, button){
 }
 
 /*Denne skal slette elementet på index i arrayen og flytte alt bak et hakk mot venstre  */
-
+/*this function should also delete all other orders for the same floor*/
 void deleteOrder(int indexInArray){
+    int floor = totalOrders[indexInArray][0];
     /*
     for (int i = 0; i < 2; i++)    {
 
@@ -97,6 +98,11 @@ void deleteOrder(int indexInArray){
     }
     totalOrders[9][0] = -1;
     totalOrders[9][1] = -1;
+
+    for (int i = 0; i < 10; ++i){
+        if(totalOrders[i][0] == floor);
+        deleteOrder(i);
+    }
 }
 
 /*This function checks the totalOrder array and checks if there are any orders going the same direction on passing floors*/
@@ -150,7 +156,8 @@ void executeOrder(){
 /*Iterates through the order array and picks an order to execute.*/
 /*In this loop we are looking for orders from inside the elevator, these are prioritized*/
 /*Sets foundOder = true so that we don't look for more orders once one is found*/
-    elevio_motorDirection(0);
+                                            //Why was this here?
+                                            // elevio_motorDirection(0);
     for (int i = 0; i < 10; ++i) {
         if((totalOrders[i][0] != -1) && (totalOrders[i][1] == 2)){
             targetFloor[0] = totalOrders[i][0];
@@ -164,17 +171,17 @@ void executeOrder(){
     if (foundOrder){
         if (currentFloor == targetFloor[0]){
             openDoor();
-            elevio_doorOpenLamp(1);
             deleteOrder(index[0]);
             closeDoor();
+            //elevio_doorOpenLamp(1);
         }
         checkPassingFloors(targetFloor, currentFloor, typeOfButton, index);
         /*We should now have an main order to execute and all the floors worth stopping by in the array targetFloor*/
         /*The elevator can now drive to the target floors, when it has stopped by all of them the order is completed*/
         for (int i = 0; i < 3; ++i){
             if (targetFloor[i] != -1){
+                //elevio_doorOpenLamp(0);
                 closeDoor();
-                elevio_doorOpenLamp(0);
                 driveToFloor(findNearestFloor(targetFloor, currentFloor));
                 openDoor();
                 //deleteOrder(index[i]);
@@ -213,7 +220,7 @@ void executeOrder(){
 
 int main(){
     elevio_init();
-   /*  startUp(); */
+    startUp();
     while (true) {
         searchOrders();
         executeOrder();
