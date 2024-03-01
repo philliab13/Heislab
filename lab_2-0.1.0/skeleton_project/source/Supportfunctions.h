@@ -23,5 +23,6 @@ void stopProcedure();
 
 void deleteOrder(int);
 void elevatorRunning();
+void searchOrders();
 
 #endif // SUPPORT_H

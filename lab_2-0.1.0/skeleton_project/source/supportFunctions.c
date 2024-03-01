@@ -56,14 +56,16 @@ int closeDoor(){
     /*check if there is an obstruction*/
     bool obstruction = elevio_obstruction();
     if (obstruction){
-        return 0;
+        while(obstruction){
+            searchOrders();
+            obstruction = elevio_obstruction();
+        }
+        
     }
-    else{
-        /*Update global variable to door is closed*/
-        isDoorOpen = false;
-        elevio_doorOpenLamp(0);
-        return 1;
-    }
+    /*Update global variable to door is closed*/
+    elevio_doorOpenLamp(0);
+    return 1;
+    
 }
 
 /*checking if both the door is closed and the emergency stop button is not pressed before it is safe to drive*/
