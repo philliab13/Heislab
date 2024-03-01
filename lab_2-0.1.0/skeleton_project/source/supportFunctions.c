@@ -1,5 +1,8 @@
 #include <Supportfunctions.h>
+
+
 extern bool isDoorOpen;
+int totalOrders[10][2];
 
 
 
@@ -34,7 +37,7 @@ int openDoor(){
         /*This is created by chat-gpt -> for report*/
         time(&start);
         while(true){
-            printf("kjorer \n");
+            //printf("kjorer \n");
             time(&end);
             if(difftime(end,start) >= 3.0){
                 break;
@@ -74,12 +77,13 @@ void startUp(){
     if (onFloor == -1){
         driveUp(onFloor);
     }
+    elevio_floorIndicator(elevio_floorSensor());
     //elevatorReady();
 }
 
 void driveUp(int onFloor){
     elevio_motorDirection(1);
-    while(onFloor == -1){
+    while(onFloor < 0){
         onFloor = elevio_floorSensor();
     }
     elevio_motorDirection(0);
@@ -93,11 +97,9 @@ void driveToFloor(int destinationFloor){
     MotorDirection direction;
     if (difference > 0){
         direction = 1;
-    }
-    else if (difference < 0){
+    }else if (difference < 0){
         direction = -1;
-    }
-    else{
+    }else{
         direction = 0;
     }
     elevio_motorDirection(direction);
@@ -168,12 +170,42 @@ int findNearestFloor(int targetFloors[], int currentFloor){
     return nextFloor;
 }
 
+void stopProcedure(){
+    elevio_stopLamp(1);
+    elevio_motorDirection(0);
+    int floor = elevio_floorSensor();
 
-
-
-/*void allFloorLightsOff();
-void allFloorLightsOff(){
-    for (int i = 0; i < N_FLOORS; ++i){
-        elevio_floorIndicator(i);
+    for(int i = 0; i < 10; ++i){
+        deleteOrder(0);
     }
-}*/
+
+
+    if(floor >= 0){
+        elevio_doorOpenLamp(1);
+        while(true){
+            if(!elevio_stopButton()){
+                break;
+            }
+        }
+        openDoor();
+        elevio_floorIndicator(elevio_floorSensor());
+    }else{
+        while(true){
+            if(!elevio_stopButton()){
+                break;
+            }
+        }
+        driveUp(-1);
+        elevio_floorIndicator(elevio_floorSensor());
+    }
+    elevio_stopLamp(0);
+    elevatorRunning();
+}
+
+void allLightsOff(){
+    for (int f = 0; f < N_FLOORS; f++){
+        for (int b = 0; b < N_BUTTONS; b++){
+            elevio_buttonLamp(f, b, 0);
+        }
+    }
+}

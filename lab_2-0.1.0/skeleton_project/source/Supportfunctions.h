@@ -1,3 +1,6 @@
+#ifndef SUPPORT_H // Header guards to prevent multiple inclusion
+#define SUPPORT_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -15,3 +18,10 @@ void driveToFloor(int);
 void driveUp(int onFloor);
 void startUp();
 int findNearestFloor(int [], int);
+void allLightsOff();
+void stopProcedure();
+
+void deleteOrder(int);
+void elevatorRunning();
+
+#endif // SUPPORT_H

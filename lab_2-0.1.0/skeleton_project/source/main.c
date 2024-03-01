@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "lights.h"
 #include <time.h>
+#include "Supportfunctions.h"
 
 
 /*Global variables*/
@@ -18,7 +19,6 @@ int totalOrders[10][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1
 
 /*Declaring functions so the layout does not matter*/
 int elevatorReady();
-
 void executeOrder();
 void stopAtFloor(int);
 void addOrder(int, int);
@@ -53,6 +53,9 @@ void searchOrders(){
             if (btnPressed){
                 addOrder(f, b);
             }
+            if(elevio_stopButton() == 1){
+                stopProcedure();
+            }
         }
     }
 }
@@ -69,7 +72,7 @@ void addOrder(floor, button){
         }
     }
     /*Looking for the first empty spot in the array to insert the new order*/
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; ++i) {
         if(totalOrders[i][0] == -1){
             totalOrders[i][0] = floor;
             totalOrders[i][1] = button;
@@ -111,10 +114,11 @@ void deleteOrder(int indexInArray){
 
 void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, int index[]){
     int direction = targetFloor[0] - currentFloor;
-    int counter = 1;
+    int counter = 0;
     if(direction > 1){
-        for (int i = 0; i < 10; i++){
-            if((totalOrders[i][1] == 0) && ((totalOrders[i][0]==currentFloor) || (totalOrders[i][0]<targetFloor[i]))){
+        for (int i = 0; i < 10; ++i){
+            //I have changed the logic for middle statement from == to 
+            if((totalOrders[i][1] == 0) && ((totalOrders[i][0] >= currentFloor) && (totalOrders[i][0] < targetFloor[i]))){
                 targetFloor[counter] = totalOrders[i][0];
                 ++counter;
                 index[counter] = i;
@@ -122,9 +126,9 @@ void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, i
         }
     }
     else if (direction <= -1){
-        for (int i = 0; i < 10; i++){
+        for (int i = 0; i < 10; ++i){
             /*Need to check the logic for this if-test*/
-            if((totalOrders[i][1] == 1) && ((totalOrders[i][0]==currentFloor) || (totalOrders[i][0]>targetFloor[i]))){
+            if((totalOrders[i][1] == 1) && ((totalOrders[i][0] <= currentFloor) || (totalOrders[i][0] > targetFloor[i]))){
                 targetFloor[counter] = totalOrders[i][0];
                 ++counter;
                 index[counter] = i;
@@ -221,10 +225,10 @@ void executeOrder(){
 int main(){
     elevio_init();
     startUp();
+    allLightsOff();
     while (true) {
         searchOrders();
         executeOrder();
-
         /* if(elevio_stopButton()){
             elevio_motorDirection(DIRN_STOP);
             break;
@@ -234,6 +238,12 @@ int main(){
     return 0;
 }
 
+void elevatorRunning(){
+    while (true) {
+        searchOrders();
+        executeOrder();
+    }
+}
 
 
 
