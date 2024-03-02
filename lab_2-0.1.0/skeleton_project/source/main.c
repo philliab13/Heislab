@@ -24,8 +24,8 @@ void stopAtFloor(int);
 void addOrder(int, int);
 void searchOrders();
 void deleteOrder(int indexInArray);
-void checkPassingFloors(int[] , int , int , int[]);
-int findOrder(int);
+void checkPassingFloors(int[] , int , int , int[], int);
+int findOrder(int,int);
 
 
 /*end of declerations*/
@@ -112,10 +112,10 @@ void deleteOrder(int indexInArray){
 /*If yes, updates the arrays targetFloor with what floor the order is on and index for location in totalOrder*/
 /*defyning that going up equals a positive number for direction*/
 
-void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, int index[]){
-    int direction = targetFloor[0] - currentFloor;
+void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, int index[], int direction){
+    //int direction = targetFloor[0] - currentFloor;
     int counter = 0;
-    if(direction > 1){
+    if(direction == 1){
         for (int i = 0; i < 10; ++i){
             //I have changed the logic for middle statement from == to 
             if((totalOrders[i][1] == 0) && ((totalOrders[i][0] >= currentFloor) && (totalOrders[i][0] < targetFloor[i]))){
@@ -125,7 +125,7 @@ void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, i
             }
         }
     }
-    else if (direction <= -1){
+    else if (direction == -1){
         for (int i = 0; i < 10; ++i){
             /*Need to check the logic for this if-test*/
             if((totalOrders[i][1] == 1) && ((totalOrders[i][0] <= currentFloor) || (totalOrders[i][0] > targetFloor[i]))){
@@ -140,9 +140,9 @@ void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, i
 
 
 /*Find if there happens to be an order for the floor we are stopping at*/
-int findOrder(int floor){
+int findOrderOnFloor(int floor){
     for (int i = 0; i < 10; ++i){
-        if ((totalOrders[i][0] != floor) && (totalOrders[i][1] == 2)){
+        if (totalOrders[i][0] == floor){
             return i;
         }
     }
@@ -173,13 +173,21 @@ void executeOrder(){
     }
     /*This section is for handling orders when they come from inside the cab*/
     if (foundOrder){
+        int direction = 0;
+        if(currentFloor - targetFloor[0] < 0){
+            direction = 1;
+        }else if(currentFloor - targetFloor[0] > 0){
+            direction = -1;
+        }
+
         if (currentFloor == targetFloor[0]){
             openDoor();
             deleteOrder(index[0]);
             closeDoor();
+            elevatorRunning();
             //elevio_doorOpenLamp(1);
         }
-        checkPassingFloors(targetFloor, currentFloor, typeOfButton, index);
+        checkPassingFloors(targetFloor, currentFloor, typeOfButton, index, direction);
         /*We should now have an main order to execute and all the floors worth stopping by in the array targetFloor*/
         /*The elevator can now drive to the target floors, when it has stopped by all of them the order is completed*/
         for (int i = 0; i < 3; ++i){
@@ -189,7 +197,7 @@ void executeOrder(){
                 driveToFloor(findNearestFloor(targetFloor, currentFloor));
                 openDoor();
                 //deleteOrder(index[i]);
-                int passBy = findOrder(currentFloor);
+                int passBy = findOrderOnFloor(currentFloor);
                 if (passBy != -1){
                     deleteOrder(passBy);
                 }

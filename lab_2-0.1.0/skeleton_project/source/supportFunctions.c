@@ -162,7 +162,8 @@ int findNearestFloor(int targetFloors[], int currentFloor){
     for (int i = 0; i < 3; ++i){
         if(targetFloors[i] != -1){
             if (abs(targetFloors[i] - currentFloor) < closest) { // Check if the value is not -1
-                closest = targetFloors[i] - currentFloor; // Update closest if found a smaller value
+                //check logic here
+                closest = abs(targetFloors[i] - currentFloor); // Update closest if found a smaller value
                 placement = i;
                 nextFloor = targetFloors[i];
             }
