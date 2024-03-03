@@ -22,7 +22,7 @@ int elevatorReady();
 void executeOrder();
 void stopAtFloor(int);
 void addOrder(int, int);
-void searchOrders();
+//void searchOrders();
 void deleteOrder(int indexInArray);
 void checkPassingFloors(int[] , int , int , int[], int);
 int findOrder(int,int);
@@ -94,7 +94,9 @@ void deleteOrder(int indexInArray){
         elevio_floorIndicator(indexInArray);
     }
     */
+   if(totalOrders[indexInArray][0] != -1){
     elevio_buttonLamp(totalOrders[indexInArray][0], totalOrders[indexInArray][1], 0);
+   }
     for (int i = indexInArray; i < 9; i++){
         totalOrders[i][0] = totalOrders[i + 1][0];
         totalOrders[i][1] = totalOrders[i + 1][1];
@@ -103,8 +105,9 @@ void deleteOrder(int indexInArray){
     totalOrders[9][1] = -1;
 
     for (int i = 0; i < 10; ++i){
-        if(totalOrders[i][0] == floor);
-        deleteOrder(i);
+        if(totalOrders[i][0] == floor){
+            deleteOrder(i);
+        }
     }
 }
 

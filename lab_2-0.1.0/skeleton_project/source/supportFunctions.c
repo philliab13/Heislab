@@ -1,4 +1,4 @@
-#include <Supportfunctions.h>
+#include "Supportfunctions.h"
 
 
 extern bool isDoorOpen;
@@ -185,23 +185,26 @@ void stopProcedure(){
 
     if(floor >= 0){
         elevio_doorOpenLamp(1);
+        //nanosleep?
         while(true){
-            if(!elevio_stopButton()){
+            if(elevio_stopButton()){
+                elevio_stopLamp(0);
                 break;
             }
         }
         openDoor();
+        closeDoor();
         elevio_floorIndicator(elevio_floorSensor());
     }else{
         while(true){
-            if(!elevio_stopButton()){
+            if(elevio_stopButton()){
+                elevio_stopLamp(0);
                 break;
             }
         }
-        driveUp(-1);
+        driveUp(floor);
         elevio_floorIndicator(elevio_floorSensor());
     }
-    elevio_stopLamp(0);
     elevatorRunning();
 }
 
@@ -211,4 +214,6 @@ void allLightsOff(){
             elevio_buttonLamp(f, b, 0);
         }
     }
+    elevio_stopLamp(0);
+    elevio_doorOpenLamp(0);
 }
