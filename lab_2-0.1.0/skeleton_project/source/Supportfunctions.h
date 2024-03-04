@@ -20,6 +20,8 @@ void startUp();
 int findNearestFloor(int [], int);
 void allLightsOff();
 void stopProcedure();
+int openDoorForStopButton();
+
 
 void deleteOrder(int);
 void elevatorRunning();

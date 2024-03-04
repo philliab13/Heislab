@@ -105,7 +105,7 @@ void deleteOrder(int indexInArray){
     totalOrders[9][1] = -1;
 
     for (int i = 0; i < 10; ++i){
-        if(totalOrders[i][0] == floor){
+        if(totalOrders[i][0] == floor && floor != -1){
             deleteOrder(i);
         }
     }
@@ -159,7 +159,7 @@ void executeOrder(){
     int index[3] = {-1, -1, -1};
     int currentFloor = elevio_floorSensor();
     bool foundOrder = false;
-    printArray(totalOrders);
+    //printArray(totalOrders);
 /*Iterates through the order array and picks an order to execute.*/
 /*In this loop we are looking for orders from inside the elevator, these are prioritized*/
 /*Sets foundOder = true so that we don't look for more orders once one is found*/

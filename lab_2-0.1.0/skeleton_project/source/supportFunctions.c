@@ -55,17 +55,17 @@ int openDoor(){
 int closeDoor(){
     /*check if there is an obstruction*/
     bool obstruction = elevio_obstruction();
-    if (obstruction){
+    if(obstruction){
         while(obstruction){
             searchOrders();
             obstruction = elevio_obstruction();
         }
-        
+        openDoor();
     }
     /*Update global variable to door is closed*/
     elevio_doorOpenLamp(0);
+    isDoorOpen = false;
     return 1;
-    
 }
 
 /*checking if both the door is closed and the emergency stop button is not pressed before it is safe to drive*/
@@ -185,17 +185,25 @@ void stopProcedure(){
 
     if(floor >= 0){
         elevio_doorOpenLamp(1);
+        nanosleep(&(struct timespec){1,0}, NULL);
         //nanosleep?
         while(true){
             if(elevio_stopButton()){
                 elevio_stopLamp(0);
                 break;
             }
+
         }
-        openDoor();
+        printf("Jeg er ute av loop\n");
+        openDoorForStopButton();
+                printf("Jeg er etter openDoor\n");
+
         closeDoor();
+                printf("Jeg er etter closeDoor\n");
+
         elevio_floorIndicator(elevio_floorSensor());
     }else{
+        nanosleep(&(struct timespec){1,0}, NULL);
         while(true){
             if(elevio_stopButton()){
                 elevio_stopLamp(0);
@@ -205,6 +213,8 @@ void stopProcedure(){
         driveUp(floor);
         elevio_floorIndicator(elevio_floorSensor());
     }
+    printf("jeg kommer hit \n");
+    nanosleep(&(struct timespec){1,0}, NULL);
     elevatorRunning();
 }
 
@@ -216,4 +226,33 @@ void allLightsOff(){
     }
     elevio_stopLamp(0);
     elevio_doorOpenLamp(0);
+}
+
+
+/*returning 1 if sucsessfully opened door, 0 otherwise*/
+int openDoorForStopButton(){
+    int floor = elevio_floorSensor();
+    time_t start, end;
+    /*checking if it safe to open door*/
+    if (floor >= 0){
+        /*Update global variable to door is open*/
+        isDoorOpen = true;
+        /*set open door light on*/
+        elevio_doorOpenLamp(1);
+        /*Keeps the door open for 3 seconds, and searches for orders at the same time*/
+        /*This is created by chat-gpt -> for report*/
+        time(&start);
+        while(true){
+            //printf("kjorer \n");
+            time(&end);
+            if(difftime(end,start) >= 3.0){
+                break;
+            }
+        }
+        
+        return 1;
+    }
+    else{
+        return 0;
+    }
 }
