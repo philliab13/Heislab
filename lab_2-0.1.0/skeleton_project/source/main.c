@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "lights.h"
 #include <time.h>
+#include "Supportfunctions.h"
 
 
 /*Global variables*/
@@ -17,21 +18,14 @@ int totalOrders[10][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1
 
 
 /*Declaring functions so the layout does not matter*/
-bool safeToDrive();
 int elevatorReady();
-void driveToFloor(int);
-void allFloorLightsOff();
 void executeOrder();
 void stopAtFloor(int);
 void addOrder(int, int);
-int openDoor();
-int closeDoor();
-void searchOrders();
+//void searchOrders();
 void deleteOrder(int indexInArray);
-void checkPassingFloors(int[] , int , int , int[]);
-int findNearestFloor(int [], int);
-int findOrder(int);
-void printArray(int [][]);
+void checkPassingFloors(int[] , int , int , int[], int);
+int findOrder(int,int);
 
 
 /*end of declerations*/
@@ -42,12 +36,12 @@ typedef struct
     int direction;
 } elevatorOrder;
 
-int elevatorReady(){
-    while (true)    {
-        executeOrder();
-    }
-    return 0;
-}
+// int elevatorReady(){
+//     while (true)    {
+//         executeOrder();
+//     }
+//     return 0;
+// }
 
 /*Scans all the buttons to see if any of them are pressed in that instance, if yes call addOrder*/
 void searchOrders(){
@@ -58,6 +52,9 @@ void searchOrders(){
             /*add order*/
             if (btnPressed){
                 addOrder(f, b);
+            }
+            if(elevio_stopButton() == 1){
+                stopProcedure();
             }
         }
     }
@@ -75,7 +72,7 @@ void addOrder(floor, button){
         }
     }
     /*Looking for the first empty spot in the array to insert the new order*/
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; ++i) {
         if(totalOrders[i][0] == -1){
             totalOrders[i][0] = floor;
             totalOrders[i][1] = button;
@@ -87,8 +84,9 @@ void addOrder(floor, button){
 }
 
 /*Denne skal slette elementet på index i arrayen og flytte alt bak et hakk mot venstre  */
-
+/*this function should also delete all other orders for the same floor*/
 void deleteOrder(int indexInArray){
+    int floor = totalOrders[indexInArray][0];
     /*
     for (int i = 0; i < 2; i++)    {
 
@@ -96,35 +94,44 @@ void deleteOrder(int indexInArray){
         elevio_floorIndicator(indexInArray);
     }
     */
+   if(totalOrders[indexInArray][0] != -1){
     elevio_buttonLamp(totalOrders[indexInArray][0], totalOrders[indexInArray][1], 0);
+   }
     for (int i = indexInArray; i < 9; i++){
         totalOrders[i][0] = totalOrders[i + 1][0];
         totalOrders[i][1] = totalOrders[i + 1][1];
     }
     totalOrders[9][0] = -1;
     totalOrders[9][1] = -1;
+
+    for (int i = 0; i < 10; ++i){
+        if(totalOrders[i][0] == floor && floor != -1){
+            deleteOrder(i);
+        }
+    }
 }
 
 /*This function checks the totalOrder array and checks if there are any orders going the same direction on passing floors*/
 /*If yes, updates the arrays targetFloor with what floor the order is on and index for location in totalOrder*/
 /*defyning that going up equals a positive number for direction*/
 
-void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, int index[]){
-    int direction = targetFloor[0] - currentFloor;
-    int counter = 1;
-    if(direction > 1){
-        for (int i = 0; i < 10; i++){
-            if((totalOrders[i][1] == 0) && ((totalOrders[i][0]==currentFloor) || (totalOrders[i][0]<targetFloor[i]))){
+void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, int index[], int direction){
+    //int direction = targetFloor[0] - currentFloor;
+    int counter = 0;
+    if(direction == 1){
+        for (int i = 0; i < 10; ++i){
+            //I have changed the logic for middle statement from == to 
+            if((totalOrders[i][1] == 0) && ((totalOrders[i][0] >= currentFloor) && (totalOrders[i][0] < targetFloor[i]))){
                 targetFloor[counter] = totalOrders[i][0];
                 ++counter;
                 index[counter] = i;
             }
         }
     }
-    else if (direction <= -1){
-        for (int i = 0; i < 10; i++){
+    else if (direction == -1){
+        for (int i = 0; i < 10; ++i){
             /*Need to check the logic for this if-test*/
-            if((totalOrders[i][1] == 1) && ((totalOrders[i][0]==currentFloor) || (totalOrders[i][0]>targetFloor[i]))){
+            if((totalOrders[i][1] == 1) && ((totalOrders[i][0] <= currentFloor) || (totalOrders[i][0] > targetFloor[i]))){
                 targetFloor[counter] = totalOrders[i][0];
                 ++counter;
                 index[counter] = i;
@@ -133,52 +140,16 @@ void checkPassingFloors(int targetFloor[], int currentFloor, int typeOfButton, i
     }
 }
 
-/*This function is for finding the right floor to drive the elevator to first*/
-/*This was created by chatGPT -> remember for report*/
-
-int findNearestFloor(int targetFloors[], int currentFloor){
-    int placement;
-    int closest = 10; 
-    int nextFloor;
-    for (int i = 0; i < 3; ++i){
-        if(targetFloors[i] != -1){
-            if (abs(targetFloors[i] - currentFloor) < closest) { // Check if the value is not -1
-                closest = targetFloors[i] - currentFloor; // Update closest if found a smaller value
-                placement = i;
-                nextFloor = targetFloors[i];
-            }
-        }
-    }
-    targetFloors[placement] = -1;
-    return nextFloor;
-}
-/*TODO: create findNearestFloor*/
 
 
 /*Find if there happens to be an order for the floor we are stopping at*/
-int findOrder(int floor){
+int findOrderOnFloor(int floor){
     for (int i = 0; i < 10; ++i){
-        if ((totalOrders[i][0] != floor) && (totalOrders[i][1] == 2)){
+        if (totalOrders[i][0] == floor){
             return i;
         }
     }
     return -1;
-}
-
-
-void printArray(int arr[10][2]){
-    int rows = 10;
-    int cols = 2;
-    for(int i = 0; i < rows; i++) {
-        printf("[");
-        for(int j = 0; j < cols; j++) {
-            printf("%d", arr[i][j]);
-            if(j != cols - 1) {
-                printf(", ");
-            }
-        }
-        printf("]\n");
-    }
 }
 
 
@@ -188,11 +159,12 @@ void executeOrder(){
     int index[3] = {-1, -1, -1};
     int currentFloor = elevio_floorSensor();
     bool foundOrder = false;
-    printArray(totalOrders);
+    //printArray(totalOrders);
 /*Iterates through the order array and picks an order to execute.*/
 /*In this loop we are looking for orders from inside the elevator, these are prioritized*/
 /*Sets foundOder = true so that we don't look for more orders once one is found*/
-    elevio_motorDirection(0);
+                                            //Why was this here?
+                                            // elevio_motorDirection(0);
     for (int i = 0; i < 10; ++i) {
         if((totalOrders[i][0] != -1) && (totalOrders[i][1] == 2)){
             targetFloor[0] = totalOrders[i][0];
@@ -204,23 +176,31 @@ void executeOrder(){
     }
     /*This section is for handling orders when they come from inside the cab*/
     if (foundOrder){
+        int direction = 0;
+        if(currentFloor - targetFloor[0] < 0){
+            direction = 1;
+        }else if(currentFloor - targetFloor[0] > 0){
+            direction = -1;
+        }
+
         if (currentFloor == targetFloor[0]){
             openDoor();
-            elevio_doorOpenLamp(1);
             deleteOrder(index[0]);
             closeDoor();
+            elevatorRunning();
+            //elevio_doorOpenLamp(1);
         }
-        checkPassingFloors(targetFloor, currentFloor, typeOfButton, index);
+        checkPassingFloors(targetFloor, currentFloor, typeOfButton, index, direction);
         /*We should now have an main order to execute and all the floors worth stopping by in the array targetFloor*/
         /*The elevator can now drive to the target floors, when it has stopped by all of them the order is completed*/
         for (int i = 0; i < 3; ++i){
             if (targetFloor[i] != -1){
+                //elevio_doorOpenLamp(0);
                 closeDoor();
-                elevio_doorOpenLamp(0);
                 driveToFloor(findNearestFloor(targetFloor, currentFloor));
                 openDoor();
                 //deleteOrder(index[i]);
-                int passBy = findOrder(currentFloor);
+                int passBy = findOrderOnFloor(currentFloor);
                 if (passBy != -1){
                     deleteOrder(passBy);
                 }
@@ -255,11 +235,11 @@ void executeOrder(){
 
 int main(){
     elevio_init();
-   /*  startUp(); */
+    startUp();
+    allLightsOff();
     while (true) {
         searchOrders();
         executeOrder();
-
         /* if(elevio_stopButton()){
             elevio_motorDirection(DIRN_STOP);
             break;
@@ -269,141 +249,17 @@ int main(){
     return 0;
 }
 
-void driveUp(int onFloor){
-    MotorDirection direction = 1;
-    elevio_motorDirection(direction);
-    while (onFloor == -1){
-        onFloor = elevio_floorSensor();
-    }
-    elevio_motorDirection(0);
-}
-
-void startUp(){
-    int onFloor = elevio_floorSensor();
-    if (onFloor == -1){
-        driveUp(onFloor);
-    }
-    elevatorReady();
-}
-
-void driveToFloor(int destinationFloor){
-    /*Safety part*/
-    /*the driving part*/
-    int currentFloor = elevio_floorSensor();
-    int difference = destinationFloor - currentFloor;
-    MotorDirection direction;
-    if (difference > 0){
-        direction = 1;
-    }
-    else if (difference < 0){
-        direction = -1;
-    }
-    else{
-        direction = 0;
-    }
-    elevio_motorDirection(direction);
-    bool safe = safeToDrive();
-    while (difference != 0 && safe){
+void elevatorRunning(){
+    while (true) {
         searchOrders();
-        currentFloor = elevio_floorSensor();
-        if (currentFloor == destinationFloor){
-            // difference = destinationFloor - currentFloor;
-            elevio_motorDirection(0);
-            break;
-        }
-        safe = safeToDrive();
-
-        /*Updating the lights*/
-        switch (currentFloor){
-            case 0:
-                elevio_floorIndicator(0);
-                break;
-            case 1:
-            elevio_floorIndicator(1);
-            break;
-            case 2:
-                elevio_floorIndicator(2);
-                break;
-            case 3:
-                elevio_floorIndicator(3);
-                break;
-            default:
-                break;
-        }
-    }
-    elevio_motorDirection(0);
-    switch (currentFloor){
-        case 0:
-            elevio_floorIndicator(0);
-            break;
-        case 1:
-        elevio_floorIndicator(1);
-        break;
-        case 2:
-            elevio_floorIndicator(2);
-            break;
-        case 3:
-            elevio_floorIndicator(3);
-            break;
-        default:
-            break;
-        }
-}
-
-void allFloorLightsOff(){
-    for (int i = 0; i < N_FLOORS; ++i){
-        elevio_floorIndicator(i);
+        executeOrder();
     }
 }
 
-/*returning 1 if sucsessfully opened door, 0 otherwise*/
-int openDoor(){
-    int floor = elevio_floorSensor();
-    time_t start, end;
-    /*checking if it safe to open door*/
-    if (floor >= 0){
-        /*Update global variable to door is open*/
-        isDoorOpen = true;
-        /*set open door light on*/
-        elevio_doorOpenLamp(1);
-        /*Keeps the door open for 3 seconds, and searches for orders at the same time*/
-        /*This is created by chat-gpt -> for report*/
-        time(&start);
-        while(true){
-            printf("kjorer \n");
-            time(&end);
-            if(difftime(end,start) >= 3.0){
-                break;
-            }
-            searchOrders();
-        }
-        
-        return 1;
-    }
-    else{
-        return 0;
-    }
-}
-/*returning 1 if sucsessfully closed door, 0 otherwise*/
-int closeDoor(){
-    /*check if there is an obstruction*/
-    bool obstruction = elevio_obstruction();
-    if (obstruction){
-        return 0;
-    }
-    else{
-        /*Update global variable to door is closed*/
-        isDoorOpen = false;
-        elevio_doorOpenLamp(0);
-        return 1;
-    }
-}
 
-/*checking if both the door is closed and the emergency stop button is not pressed before it is safe to drive*/
-bool safeToDrive(){
-    bool stopButton = elevio_stopButton();
-    return !isDoorOpen && !stopButton;
-}
+
+
+
 
 
 
