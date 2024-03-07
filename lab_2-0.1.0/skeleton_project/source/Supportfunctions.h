@@ -16,6 +16,7 @@ bool foundOrder;
 int typeOfButton;
 int direction;
 int counter;
+int placement;
 
 
 // Declerations
@@ -27,7 +28,7 @@ bool safeToDrive();
 void driveToFloor(int);
 void driveUp(int onFloor);
 void startUp();
-int findNearestFloor(int, int*);
+int findNearestFloor(int);
 void allLightsOff();
 void stopProcedure();
 int openDoorForStopButton();
@@ -36,7 +37,10 @@ int openDoorForStopButton();
 void deleteOrder(int);
 void elevatorRunning();
 void searchOrders();
-void checkPassingFloors(int, int, int);
+bool checkPassingFloors(int, int, int);
+int findOrderOnFloor(int);
+
+void completeNextOrder(int);
 
 /* 
 #endif // SUPPORT_H

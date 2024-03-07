@@ -113,9 +113,11 @@ void driveToFloor(int destinationFloor){
     elevio_motorDirection(direction);
     bool safe = safeToDrive();
     while (difference != 0 && safe){
-        searchOrders();
-        checkPassingFloors(previousFloor, 0, counter);
         currentFloor = elevio_floorSensor();
+        searchOrders();
+        if(checkPassingFloors(previousFloor, 0, counter)){
+            completeNextOrder(currentFloor);
+        }
         if (currentFloor == destinationFloor){
             // difference = destinationFloor - currentFloor;
             elevio_motorDirection(0);
@@ -164,9 +166,41 @@ void driveToFloor(int destinationFloor){
         }
 }
 
+void completeNextOrder(int currentFloor){
+    direction=0;
+    if(elevio_floorSensor() - targetFloor[0] < 0){
+            direction = 1;
+        }else if(elevio_floorSensor() - targetFloor[0] > 0){
+            direction = -1;
+        }
+       while((targetFloor[0] != -1) || (targetFloor[1] != -1) || (targetFloor[2] != -1)){;
+            printf("er i denne lokken, halooooooooo \n");
+            printf("targetfloor: %d  %d  %d \n",targetFloor[0],targetFloor[1], targetFloor[2]);
+
+            closeDoor();
+            checkPassingFloors(currentFloor, typeOfButton, counter);
+            driveToFloor(findNearestFloor(currentFloor));
+            currentFloor = elevio_floorSensor();
+            openDoor();
+            //deleteOrder(floor_index[placement]);
+            int passBy = findOrderOnFloor(currentFloor);
+            if (passBy != -1){
+                printf("Hei\n");
+                deleteOrder(passBy);
+               
+            }
+            //targetFloor[placement] = -1;
+            closeDoor();
+            checkPassingFloors(currentFloor, typeOfButton, counter);
+            
+        }
+         
+    }
+
+
 
 /*This function is for finding the right floor to drive the elevator to first*/
-int findNearestFloor(int currentFloor, int * placement){
+int findNearestFloor(int currentFloor){
     int closest = 10; 
     int nextFloor;
     for (int i = 0; i < 4; ++i){
@@ -174,12 +208,12 @@ int findNearestFloor(int currentFloor, int * placement){
             if (abs(targetFloor[i] - currentFloor) < closest) { // Check if the value is not -1
                 //check logic here
                 closest = abs(targetFloor[i] - currentFloor); // Update closest if found a smaller value
-                *placement = i;
+                placement = i;
                 nextFloor = targetFloor[i];
             }
         }
     }
-    targetFloor[*placement] = -1;
+    targetFloor[placement] = -1;
     return nextFloor;
 }
 
