@@ -62,8 +62,6 @@ int closeDoor(){
             searchOrders();
             obstruction = elevio_obstruction();
         }
-        printf("det er jeg som er dust \n");
-
         openDoor();
     }
     /*Update global variable to door is closed*/
@@ -95,28 +93,21 @@ void driveUp(int onFloor){
     elevio_motorDirection(0);
 }
 
-void driveToFloor(int destinationFloor){
+bool driveToFloor(int destinationFloor){
     /*Safety part*/
     /*the driving part*/
     int currentFloor = elevio_floorSensor();
     int previousFloor = currentFloor;
     int difference = destinationFloor - currentFloor;
 
-    MotorDirection direction;
-    if (difference > 0){
-        direction = 1;
-    }else if (difference < 0){
-        direction = -1;
-    }else{
-        direction = 0;
-    }
     elevio_motorDirection(direction);
     bool safe = safeToDrive();
+
     while (difference != 0 && safe){
         currentFloor = elevio_floorSensor();
         searchOrders();
-        if(checkPassingFloors(previousFloor, 0, counter)){
-            completeNextOrder(currentFloor);
+        if(checkPassingFloors(previousFloor)){
+            return false;
         }
         if (currentFloor == destinationFloor){
             // difference = destinationFloor - currentFloor;
@@ -164,40 +155,8 @@ void driveToFloor(int destinationFloor){
         default:
             break;
         }
+    return true;
 }
-
-void completeNextOrder(int currentFloor){
-    direction=0;
-    if(elevio_floorSensor() - targetFloor[0] < 0){
-            direction = 1;
-        }else if(elevio_floorSensor() - targetFloor[0] > 0){
-            direction = -1;
-        }
-       while((targetFloor[0] != -1) || (targetFloor[1] != -1) || (targetFloor[2] != -1)){;
-            printf("er i denne lokken, halooooooooo \n");
-            printf("targetfloor: %d  %d  %d \n",targetFloor[0],targetFloor[1], targetFloor[2]);
-
-            closeDoor();
-            checkPassingFloors(currentFloor, typeOfButton, counter);
-            driveToFloor(findNearestFloor(currentFloor));
-            currentFloor = elevio_floorSensor();
-            openDoor();
-            //deleteOrder(floor_index[placement]);
-            int passBy = findOrderOnFloor(currentFloor);
-            if (passBy != -1){
-                printf("Hei\n");
-                deleteOrder(passBy);
-               
-            }
-            //targetFloor[placement] = -1;
-            closeDoor();
-            checkPassingFloors(currentFloor, typeOfButton, counter);
-            
-        }
-         
-    }
-
-
 
 /*This function is for finding the right floor to drive the elevator to first*/
 int findNearestFloor(int currentFloor){
@@ -298,5 +257,39 @@ int openDoorForStopButton(){
     }
     else{
         return 0;
+    }
+}
+
+
+
+void bubbleSort(int size, int ascending) {
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = 0; j < size - i - 1; j++) {
+            if (ascending) {
+                if (targetFloor[j] > targetFloor[j + 1]) {
+                    // Swap targetFloor[j] and targetFloor[j + 1]
+                    int temp = targetFloor[j];
+                    targetFloor[j] = targetFloor[j + 1];
+                    targetFloor[j + 1] = temp;
+
+                    // Swap arr2[j] and arr2[j + 1] accordingly
+                    temp = floor_index[j];
+                    floor_index[j] = floor_index[j + 1];
+                    floor_index[j + 1] = temp;
+                }
+            } else {
+                if (targetFloor[j] < targetFloor[j + 1]) {
+                    // Swap targetFloor[j] and targetFloor[j + 1]
+                    int temp = targetFloor[j];
+                    targetFloor[j] = targetFloor[j + 1];
+                    targetFloor[j + 1] = temp;
+
+                    // Swap floor_index[j] and floor_index[j + 1] accordingly
+                    temp = floor_index[j];
+                    floor_index[j] = floor_index[j + 1];
+                    floor_index[j + 1] = temp;
+                }
+            }
+        }
     }
 }

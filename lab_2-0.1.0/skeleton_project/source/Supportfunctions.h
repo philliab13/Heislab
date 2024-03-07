@@ -25,22 +25,24 @@ void printArray(int arr[10][2]);
 int openDoor();
 int closeDoor();
 bool safeToDrive();
-void driveToFloor(int);
+bool driveToFloor(int);
 void driveUp(int onFloor);
 void startUp();
 int findNearestFloor(int);
 void allLightsOff();
 void stopProcedure();
 int openDoorForStopButton();
+void updateDirection();
 
 
 void deleteOrder(int);
 void elevatorRunning();
 void searchOrders();
-bool checkPassingFloors(int, int, int);
+bool checkPassingFloors(int);
 int findOrderOnFloor(int);
 
 void completeNextOrder(int);
+void bubbleSort(int , int );
 
 /* 
 #endif // SUPPORT_H
