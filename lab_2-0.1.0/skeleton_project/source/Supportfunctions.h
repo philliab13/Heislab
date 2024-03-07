@@ -10,11 +10,12 @@
 #include "lights.h"
 #include <time.h>
 
-int targetFloor[3];
-int floor_index[3];
+int targetFloor[4];
+int floor_index[4];
 bool foundOrder;
 int typeOfButton;
 int direction;
+int counter;
 
 
 // Declerations
@@ -35,6 +36,8 @@ int openDoorForStopButton();
 void deleteOrder(int);
 void elevatorRunning();
 void searchOrders();
+void checkPassingFloors(int, int, int);
+
 /* 
 #endif // SUPPORT_H
 #ifndef SUPPORT_H // Header guards to prevent multiple inclusion

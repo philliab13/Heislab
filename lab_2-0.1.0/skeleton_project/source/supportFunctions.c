@@ -25,6 +25,8 @@ void printArray(int arr[10][2]){
 
 /*returning 1 if sucsessfully opened door, 0 otherwise*/
 int openDoor(){
+    printf("er i openDoor \n");
+
     int floor = elevio_floorSensor();
     time_t start, end;
     /*checking if it safe to open door*/
@@ -60,6 +62,8 @@ int closeDoor(){
             searchOrders();
             obstruction = elevio_obstruction();
         }
+        printf("det er jeg som er dust \n");
+
         openDoor();
     }
     /*Update global variable to door is closed*/
@@ -95,7 +99,9 @@ void driveToFloor(int destinationFloor){
     /*Safety part*/
     /*the driving part*/
     int currentFloor = elevio_floorSensor();
+    int previousFloor = currentFloor;
     int difference = destinationFloor - currentFloor;
+
     MotorDirection direction;
     if (difference > 0){
         direction = 1;
@@ -108,6 +114,7 @@ void driveToFloor(int destinationFloor){
     bool safe = safeToDrive();
     while (difference != 0 && safe){
         searchOrders();
+        checkPassingFloors(previousFloor, 0, counter);
         currentFloor = elevio_floorSensor();
         if (currentFloor == destinationFloor){
             // difference = destinationFloor - currentFloor;
@@ -120,15 +127,19 @@ void driveToFloor(int destinationFloor){
         switch (currentFloor){
             case 0:
                 elevio_floorIndicator(0);
+                previousFloor = 0;
                 break;
             case 1:
             elevio_floorIndicator(1);
+            previousFloor = 1;
             break;
             case 2:
                 elevio_floorIndicator(2);
+                previousFloor = 2;
                 break;
             case 3:
                 elevio_floorIndicator(3);
+                previousFloor = 3;
                 break;
             default:
                 break;
@@ -158,7 +169,7 @@ void driveToFloor(int destinationFloor){
 int findNearestFloor(int currentFloor, int * placement){
     int closest = 10; 
     int nextFloor;
-    for (int i = 0; i < 3; ++i){
+    for (int i = 0; i < 4; ++i){
         if(targetFloor[i] != -1){
             if (abs(targetFloor[i] - currentFloor) < closest) { // Check if the value is not -1
                 //check logic here
@@ -168,7 +179,6 @@ int findNearestFloor(int currentFloor, int * placement){
             }
         }
     }
-    targetFloor[*placement] = -1;
     targetFloor[*placement] = -1;
     return nextFloor;
 }
