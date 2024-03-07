@@ -155,21 +155,21 @@ void driveToFloor(int destinationFloor){
 
 
 /*This function is for finding the right floor to drive the elevator to first*/
-int findNearestFloor(int targetFloors[], int currentFloor){
-    int placement;
+int findNearestFloor(int currentFloor, int * placement){
     int closest = 10; 
     int nextFloor;
     for (int i = 0; i < 3; ++i){
-        if(targetFloors[i] != -1){
-            if (abs(targetFloors[i] - currentFloor) < closest) { // Check if the value is not -1
+        if(targetFloor[i] != -1){
+            if (abs(targetFloor[i] - currentFloor) < closest) { // Check if the value is not -1
                 //check logic here
-                closest = abs(targetFloors[i] - currentFloor); // Update closest if found a smaller value
-                placement = i;
-                nextFloor = targetFloors[i];
+                closest = abs(targetFloor[i] - currentFloor); // Update closest if found a smaller value
+                *placement = i;
+                nextFloor = targetFloor[i];
             }
         }
     }
-    targetFloors[placement] = -1;
+    targetFloor[*placement] = -1;
+    targetFloor[*placement] = -1;
     return nextFloor;
 }
 
