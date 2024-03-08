@@ -5,8 +5,10 @@
  bool isDoorOpen = false;
 
  int  totalOrders[10][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
-int targetFloor[4]={-1,-1,-1, -1};
-int floor_index[4] = {-1, -1, -1, -1};
+// int targetFloor[4]={-1,-1,-1, -1};
+// int floor_index[4] = {-1, -1, -1, -1};
+int targetFloor[4]={2,-1,1,-1};
+int floor_index[4]={20,-1,10,-1};
 
  bool foundOrder = false;
  int direction = 0;
@@ -106,6 +108,15 @@ void deleteOrder(int indexInArray){
     }
 }
 
+bool notDuplicate(int floor){
+    for(int i=0; i<4; i++){
+        if(floor==targetFloor[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
 /*This function checks the totalOrder array and checks if there are any orders going the same direction on passing floors*/
 /*If yes, updates the arrays targetFloor with what floor the order is on and index for location in totalOrder*/
 /*defyning that going up equals a positive number for direction*/
@@ -114,7 +125,8 @@ bool checkPassingFloors(int currentFloor){
     bool changes= false;
     if(direction == 1){
         for (int i = 0; i < 10; ++i){
-            if(  ((totalOrders[i][1] == 0) && ((totalOrders[i][0] >= currentFloor))) || (totalOrders[i][0] == 3)  ){
+            //Legg in funk for å sjekke om det er duplikater det skal være test som sjekker om etasjen som trykkes allerede ligger i target floor
+            if(  ((totalOrders[i][1] == 0 || totalOrders[i][1]==2) && ((totalOrders[i][0] >= currentFloor)) && (notDuplicate(totalOrders[i][0])))   ){
                 for(int k = 0; k < 4; ++k){
                     if(targetFloor[k] == -1 && floor_index[k] == -1){
                         targetFloor[k] = totalOrders[i][0];
@@ -129,7 +141,7 @@ bool checkPassingFloors(int currentFloor){
     }
     else if (direction == -1){
         for (int i = 0; i < 10; ++i){            
-            if( ((totalOrders[i][1] == 1) && (totalOrders[i][0] <= currentFloor)) || (totalOrders[i][0] == 0)){
+            if( ((totalOrders[i][1] == 1 || totalOrders[i][1]==2) && (totalOrders[i][0] <= currentFloor) && (notDuplicate(totalOrders[i][0]))) ){
                 for(int k = 0; k < 4; ++k){
                     if(targetFloor[k] == -1 && floor_index[k] == -1){
                         targetFloor[k] = totalOrders[i][0];
@@ -216,13 +228,14 @@ void executeOrder(){
                     closeDoor();
                     /*Make sure the direction is correct before checking for orders we should stop by*/
                     updateDirection();
-                    checkPassingFloors(currentFloor);
+                     checkPassingFloors(currentFloor);
                     updateDirection();
                     /*starts driving to correct floor, is false if we have to make another stop before the original*/
                     bool madeItToDestination = driveToFloor(targetFloor[0]);
-                    currentFloor = elevio_floorSensor();
+                    
                     printf("er her \n");
                     if(madeItToDestination){
+                        currentFloor = elevio_floorSensor();
                         openDoor();
             printf("target floor: %d %d %d %d  floor_index[i]:  %d %d %d %d \n", targetFloor[0],targetFloor[1],targetFloor[2],targetFloor[3], floor_index[0],floor_index[1],floor_index[2],floor_index[3]);
                         deleteOrder(floor_index[0]);
@@ -312,6 +325,8 @@ int main(){
     allLightsOff();
 
     elevatorRunning();
+
+  
     return 0;
 }
 

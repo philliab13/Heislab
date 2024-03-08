@@ -115,6 +115,7 @@ bool driveToFloor(int destinationFloor){
         currentFloor = elevio_floorSensor();
         searchOrders();
         if(checkPassingFloors(previousFloor)){
+            elevio_motorDirection(0);
             printf("Jeg returnerer fra driveToFloor \n");
             return false;
         }
@@ -272,8 +273,44 @@ int openDoorForStopButton(){
 
 /*This function should be working -> tested*/
 
+// void bubbleSort(int size, bool ascending) {
+// // Loop through each element of the array
+//     for (int i = 0; i < size - 1; i++) {
+//         for (int j = 0; j < size - i - 1; j++) {
+//             // Determine if a swap should occur
+//             bool shouldSwap = false;
+
+//             if (ascending) {
+//                 // For ascending order, move -1 to the end and sort the rest
+//                 if ((targetFloor[j] == -1 && targetFloor[j + 1] != -1) ||
+//                     (targetFloor[j] != -1 && targetFloor[j + 1] != -1 && targetFloor[j] > targetFloor[j + 1])) {
+//                     shouldSwap = true;
+//                 }
+//             } else {
+//                 // For descending order, ensure -1 stays at the end and sort the rest
+//                 if ((targetFloor[j] != -1 && targetFloor[j + 1] == -1) ||
+//                     (targetFloor[j] != -1 && targetFloor[j + 1] != -1 && targetFloor[j] < targetFloor[j + 1])) {
+//                     shouldSwap = true;
+//                 }
+//             }
+
+//             // Perform the swap if necessary
+//             if (shouldSwap) {
+//                 int temp = targetFloor[j];
+//                 targetFloor[j] = targetFloor[j + 1];
+//                 targetFloor[j + 1] = temp;
+
+//                 // Swap the floor_index values in parallel to maintain linkage
+//                 temp = floor_index[j];
+//                 floor_index[j] = floor_index[j + 1];
+//                 floor_index[j + 1] = temp;
+//             }
+//         }
+//     }
+// }
+
 void bubbleSort(int size, bool ascending) {
-// Loop through each element of the array
+    // Loop through each element of the array
     for (int i = 0; i < size - 1; i++) {
         for (int j = 0; j < size - i - 1; j++) {
             // Determine if a swap should occur
@@ -281,14 +318,14 @@ void bubbleSort(int size, bool ascending) {
 
             if (ascending) {
                 // For ascending order, move -1 to the end and sort the rest
-                if ((targetFloor[j] == -1 && targetFloor[j + 1] != -1) ||
+                if ((targetFloor[j] == -1 && targetFloor[j + 1] != -1) || 
                     (targetFloor[j] != -1 && targetFloor[j + 1] != -1 && targetFloor[j] > targetFloor[j + 1])) {
                     shouldSwap = true;
                 }
             } else {
                 // For descending order, ensure -1 stays at the end and sort the rest
-                if ((targetFloor[j] != -1 && targetFloor[j + 1] == -1) ||
-                    (targetFloor[j] != -1 && targetFloor[j + 1] != -1 && targetFloor[j] < targetFloor[j + 1])) {
+                if ((targetFloor[j] == -1 && targetFloor[j + 1] == -1) || 
+                    (targetFloor[j + 1] != -1 && targetFloor[j] < targetFloor[j + 1])) {
                     shouldSwap = true;
                 }
             }
@@ -299,7 +336,8 @@ void bubbleSort(int size, bool ascending) {
                 targetFloor[j] = targetFloor[j + 1];
                 targetFloor[j + 1] = temp;
 
-                // Swap the floor_index values in parallel to maintain linkage
+                // Assuming you want to swap the floor_index values in parallel to maintain linkage
+                // Uncomment the following lines if floor_index swapping is needed
                 temp = floor_index[j];
                 floor_index[j] = floor_index[j + 1];
                 floor_index[j + 1] = temp;
@@ -307,6 +345,7 @@ void bubbleSort(int size, bool ascending) {
         }
     }
 }
+
 
 
 // void printArraysss(int size) {
