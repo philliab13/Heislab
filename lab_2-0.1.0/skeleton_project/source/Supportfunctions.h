@@ -43,7 +43,7 @@ bool checkPassingFloors(int);
 int findOrderOnFloor(int);
 
 void completeNextOrder(int);
-void bubbleSort(int , int );
+void bubbleSort(int , bool );
 
 /* 
 #endif // SUPPORT_H

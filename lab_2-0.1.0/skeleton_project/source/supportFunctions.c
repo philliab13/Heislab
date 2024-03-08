@@ -271,37 +271,38 @@ int openDoorForStopButton(){
 
 
 /*This function should be working -> tested*/
-void bubbleSort(int size, int ascending) {
+
+void bubbleSort(int size, bool ascending) {
+// Loop through each element of the array
     for (int i = 0; i < size - 1; i++) {
         for (int j = 0; j < size - i - 1; j++) {
-            // Check if the current element is -1
-            bool currentIsMinusOne = (targetFloor[j] == -1);
-            bool nextIsMinusOne = (targetFloor[j + 1] == -1);
+            // Determine if a swap should occur
+            bool shouldSwap = false;
 
             if (ascending) {
-                if (currentIsMinusOne || (!nextIsMinusOne && targetFloor[j] > targetFloor[j + 1])) {
-                    // Swap targetFloor[j] and targetFloor[j + 1]
-                    int temp = targetFloor[j];
-                    targetFloor[j] = targetFloor[j + 1];
-                    targetFloor[j + 1] = temp;
-
-                    // Swap floor_index[j] and floor_index[j + 1] accordingly
-                    temp = floor_index[j];
-                    floor_index[j] = floor_index[j + 1];
-                    floor_index[j + 1] = temp;
+                // For ascending order, move -1 to the end and sort the rest
+                if ((targetFloor[j] == -1 && targetFloor[j + 1] != -1) ||
+                    (targetFloor[j] != -1 && targetFloor[j + 1] != -1 && targetFloor[j] > targetFloor[j + 1])) {
+                    shouldSwap = true;
                 }
-            } else { // Sorting in descending order
-                if (!currentIsMinusOne && (nextIsMinusOne || targetFloor[j] < targetFloor[j + 1])) {
-                    // Swap targetFloor[j] and targetFloor[j + 1]
-                    int temp = targetFloor[j];
-                    targetFloor[j] = targetFloor[j + 1];
-                    targetFloor[j + 1] = temp;
-
-                    // Swap floor_index[j] and floor_index[j + 1] accordingly
-                    temp = floor_index[j];
-                    floor_index[j] = floor_index[j + 1];
-                    floor_index[j + 1] = temp;
+            } else {
+                // For descending order, ensure -1 stays at the end and sort the rest
+                if ((targetFloor[j] != -1 && targetFloor[j + 1] == -1) ||
+                    (targetFloor[j] != -1 && targetFloor[j + 1] != -1 && targetFloor[j] < targetFloor[j + 1])) {
+                    shouldSwap = true;
                 }
+            }
+
+            // Perform the swap if necessary
+            if (shouldSwap) {
+                int temp = targetFloor[j];
+                targetFloor[j] = targetFloor[j + 1];
+                targetFloor[j + 1] = temp;
+
+                // Swap the floor_index values in parallel to maintain linkage
+                temp = floor_index[j];
+                floor_index[j] = floor_index[j + 1];
+                floor_index[j + 1] = temp;
             }
         }
     }
