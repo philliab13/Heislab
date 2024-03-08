@@ -15,6 +15,7 @@ int floor_index[4]={20,-1,10,-1};
  //int counter = 0;
  int placement = 0;
  int typeOfButton = 0;
+ int previousFloor=0;
 
 
 /*Declaring functions so the layout does not matter*/
@@ -234,6 +235,10 @@ void executeOrder(){
                     bool madeItToDestination = driveToFloor(targetFloor[0]);
                     
                     printf("er her \n");
+                    while(!madeItToDestination){
+                        madeItToDestination = driveToFloor(targetFloor[0]);
+                    }
+
                     if(madeItToDestination){
                         currentFloor = elevio_floorSensor();
                         openDoor();

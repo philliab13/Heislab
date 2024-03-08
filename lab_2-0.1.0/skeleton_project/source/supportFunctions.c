@@ -10,6 +10,7 @@
  extern int direction;
  //extern int counter;
  extern int placement;
+ extern int previousFloor;
 
 
 
@@ -105,8 +106,8 @@ bool driveToFloor(int destinationFloor){
     /*Safety part*/
     /*the driving part*/
     int currentFloor = elevio_floorSensor();
-    int previousFloor = currentFloor;
-    int difference = destinationFloor - currentFloor;
+    previousFloor = currentFloor;
+    int difference = destinationFloor - previousFloor;
 
     elevio_motorDirection(direction);
     bool safe = safeToDrive();
