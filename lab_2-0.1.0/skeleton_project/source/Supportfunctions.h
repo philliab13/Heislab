@@ -9,14 +9,15 @@
 #include <unistd.h>
 #include "lights.h"
 #include <time.h>
+#include <assert.h>
 
-int targetFloor[4];
-int floor_index[4];
-bool foundOrder;
-int typeOfButton;
-int direction;
-int counter;
-int placement;
+// int targetFloor[4];
+// int floor_index[4];
+// bool foundOrder;
+// int typeOfButton;
+// int direction;
+// int counter;
+// int placement;
 
 
 // Declerations

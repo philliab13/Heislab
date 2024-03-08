@@ -2,15 +2,17 @@
 
 
 /*Global variables*/
-bool isDoorOpen = false;
+ bool isDoorOpen = false;
 
-int totalOrders[10][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
+ int  totalOrders[10][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
 int targetFloor[4]={-1,-1,-1, -1};
 int floor_index[4] = {-1, -1, -1, -1};
-bool foundOrder = false;
-int direction = 0;
-int counter = 0;
-int placement = 0;
+
+ bool foundOrder = false;
+ int direction = 0;
+ //int counter = 0;
+ int placement = 0;
+ int typeOfButton = 0;
 
 
 /*Declaring functions so the layout does not matter*/
@@ -78,6 +80,7 @@ void addOrder(floor, button){
 /*Denne skal slette elementet på index i arrayen og flytte alt bak et hakk mot venstre  */
 /*this function should also delete all other orders for the same floor*/
 void deleteOrder(int indexInArray){
+    assert(indexInArray >= 0 && "Index passed to delete order is <0");
     int floor = totalOrders[indexInArray][0];
     /*
     for (int i = 0; i < 2; i++)    {
@@ -86,9 +89,9 @@ void deleteOrder(int indexInArray){
         elevio_floorIndicator(indexInArray);
     }
     */
-   if(totalOrders[indexInArray][0] != -1){
-    elevio_buttonLamp(totalOrders[indexInArray][0], totalOrders[indexInArray][1], 0);
-   }
+    if(totalOrders[indexInArray][0] != -1){
+        elevio_buttonLamp(totalOrders[indexInArray][0], totalOrders[indexInArray][1], 0);
+    }
     for (int i = indexInArray; i < 9; i++){
         totalOrders[i][0] = totalOrders[i + 1][0];
         totalOrders[i][1] = totalOrders[i + 1][1];
@@ -106,27 +109,35 @@ void deleteOrder(int indexInArray){
 /*This function checks the totalOrder array and checks if there are any orders going the same direction on passing floors*/
 /*If yes, updates the arrays targetFloor with what floor the order is on and index for location in totalOrder*/
 /*defyning that going up equals a positive number for direction*/
-
+/*Tested, should in theory work*/
 bool checkPassingFloors(int currentFloor){
     bool changes= false;
     if(direction == 1){
         for (int i = 0; i < 10; ++i){
             if(  ((totalOrders[i][1] == 0) && ((totalOrders[i][0] >= currentFloor))) || (totalOrders[i][0] == 3)  ){
-                targetFloor[counter] = totalOrders[i][0];
-                floor_index[counter] = i;
-                ++counter;
-                changes=true;
+                for(int k = 0; k < 4; ++k){
+                    if(targetFloor[k] == -1 && floor_index[k] == -1){
+                        targetFloor[k] = totalOrders[i][0];
+                        floor_index[k] = i;
+                        changes=true;
+                        break;
+                    }
+                }
             }
         }
         bubbleSort(4,1);
     }
     else if (direction == -1){
         for (int i = 0; i < 10; ++i){            
-            if( (totalOrders[i][1] == 1) && ((totalOrders[i][0] <= currentFloor)) || (totalOrders[i][0] == 0)){
-                targetFloor[counter] = totalOrders[i][0];
-                ++counter;
-                floor_index[counter] = i;
-                changes=true;
+            if( ((totalOrders[i][1] == 1) && (totalOrders[i][0] <= currentFloor)) || (totalOrders[i][0] == 0)){
+                for(int k = 0; k < 4; ++k){
+                    if(targetFloor[k] == -1 && floor_index[k] == -1){
+                        targetFloor[k] = totalOrders[i][0];
+                        floor_index[k] = i;
+                        changes=true;
+                        break;
+                    }
+                }
             }
         }
         /*sort largest floor first*/
@@ -139,6 +150,25 @@ bool checkPassingFloors(int currentFloor){
         
         return false;}
 }
+void resetArrays(){
+    for(int i = 0; i < 4; ++i){
+        targetFloor[i] = -1;
+        floor_index[i] = -1;
+    }
+    for(int i = 0; i < 10; ++i){
+        totalOrders[i][0] = -1;
+        totalOrders[i][1] = -1;
+    }
+}
+bool targetFloorContains(int floor) {
+    for (int i = 0; i < 4; i++) {
+        if (targetFloor[i] == floor) {
+            return true; // Floor found in the array
+        }
+    }
+    return false; // Floor not found in the array
+}
+
 
 
 
@@ -155,7 +185,7 @@ int findOrderOnFloor(int floor){
 
 void executeOrder(){
     /*reset's variables*/
-    counter = 0;
+    //counter = 0;
     placement=0;
     foundOrder = false;
     direction = 0;
@@ -179,9 +209,11 @@ void executeOrder(){
             elevatorRunning();
         }
         /*while should run as long as we have orders in the same direction*/
-        while(targetFloor[0] != -1 && targetFloor[1] != -1 && targetFloor[2] != -1 && targetFloor[3] != -1){
+        while(targetFloor[0] != -1 || targetFloor[1] != -1 || targetFloor[2] != -1 || targetFloor[3] != -1){
+            //counter = 0;
             for(int i = 0; i < 4; ++i){
-                if(targetFloor[i] != -1){
+                //printf("halooo %d\n", targetFloor[i]);
+                if(targetFloor[i] >= 0){
                     closeDoor();
                     /*Make sure the direction is correct before checking for orders we should stop by*/
                     updateDirection();
@@ -189,8 +221,10 @@ void executeOrder(){
                     updateDirection();
                     /*starts driving to correct floor, is false if we have to make another stop before the original*/
                     bool madeItToDestination = driveToFloor(targetFloor[i]);
+                    printf("er her \n");
                     if(madeItToDestination){
                         openDoor();
+                        printf("target floor: %d   floor_index[i]:  %d \n", targetFloor[i], floor_index[i]);
                         deleteOrder(floor_index[i]);
                         targetFloor[i] = -1;
                         floor_index[i] = -1;
@@ -239,6 +273,7 @@ void updateOrdersCab(){
         }
     }
 }
+
 void updateOrders(){
     /*Iterates through the order array and picks an order to execute.*/
     /*In this loop we are looking for orders from inside the elevator, these are prioritized*/
@@ -269,13 +304,16 @@ void updateDirection(){
         direction = 0;
     }
 }
+
 int main(){
     elevio_init();
     startUp();
     allLightsOff();
+
     elevatorRunning();
     return 0;
 }
+
 
 void elevatorRunning(){
     while (true) {

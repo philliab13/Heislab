@@ -1,8 +1,15 @@
 #include "Supportfunctions.h"
 
 
-extern bool isDoorOpen;
-int totalOrders[10][2];
+ extern bool isDoorOpen;
+
+ extern int  totalOrders[10][2];
+ extern int targetFloor[4];
+ extern int floor_index[4];
+ extern bool foundOrder;
+ extern int direction;
+ //extern int counter;
+ extern int placement;
 
 
 
@@ -94,6 +101,7 @@ void driveUp(int onFloor){
 }
 
 bool driveToFloor(int destinationFloor){
+    printf("Jeg kommer til driveToFloor \n");
     /*Safety part*/
     /*the driving part*/
     int currentFloor = elevio_floorSensor();
@@ -107,6 +115,7 @@ bool driveToFloor(int destinationFloor){
         currentFloor = elevio_floorSensor();
         searchOrders();
         if(checkPassingFloors(previousFloor)){
+            printf("Jeg returnerer fra driveToFloor \n");
             return false;
         }
         if (currentFloor == destinationFloor){
@@ -261,24 +270,28 @@ int openDoorForStopButton(){
 }
 
 
-
+/*This function should be working -> tested*/
 void bubbleSort(int size, int ascending) {
     for (int i = 0; i < size - 1; i++) {
         for (int j = 0; j < size - i - 1; j++) {
+            // Check if the current element is -1
+            bool currentIsMinusOne = (targetFloor[j] == -1);
+            bool nextIsMinusOne = (targetFloor[j + 1] == -1);
+
             if (ascending) {
-                if (targetFloor[j] > targetFloor[j + 1]) {
+                if (currentIsMinusOne || (!nextIsMinusOne && targetFloor[j] > targetFloor[j + 1])) {
                     // Swap targetFloor[j] and targetFloor[j + 1]
                     int temp = targetFloor[j];
                     targetFloor[j] = targetFloor[j + 1];
                     targetFloor[j + 1] = temp;
 
-                    // Swap arr2[j] and arr2[j + 1] accordingly
+                    // Swap floor_index[j] and floor_index[j + 1] accordingly
                     temp = floor_index[j];
                     floor_index[j] = floor_index[j + 1];
                     floor_index[j + 1] = temp;
                 }
-            } else {
-                if (targetFloor[j] < targetFloor[j + 1]) {
+            } else { // Sorting in descending order
+                if (!currentIsMinusOne && (nextIsMinusOne || targetFloor[j] < targetFloor[j + 1])) {
                     // Swap targetFloor[j] and targetFloor[j + 1]
                     int temp = targetFloor[j];
                     targetFloor[j] = targetFloor[j + 1];
@@ -293,3 +306,27 @@ void bubbleSort(int size, int ascending) {
         }
     }
 }
+
+
+// void printArraysss(int size) {
+//     printf("targetFloor: ");
+//     for (int i = 0; i < size; i++) {
+//         printf("%d ", targetFloor[i]);
+//     }
+//     printf("\n");
+
+//     printf("floor_index: ");
+//     for (int i = 0; i < size; i++) {
+//         printf("%d ", floor_index[i]);
+//     }
+//     printf("\n\n");
+// }
+//     int size = sizeof(targetFloor) / sizeof(targetFloor[0]);
+//     // Test sorting in ascending order
+//     printf("Sorting in ascending order:\n");
+//     bubbleSort(size, 1);
+//     printArraysss(size);
+//     // Test sorting in descending order
+//     printf("Sorting in descending order:\n");
+//     bubbleSort(size, 0);
+//     printArraysss(size);
