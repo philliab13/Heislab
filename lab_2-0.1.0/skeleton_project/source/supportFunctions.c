@@ -13,7 +13,12 @@
  extern int previousFloor;
 
 
-
+void resetArrays(){
+    for(int i = 0; i < 4; ++i){
+        targetFloor[i] = -1;
+        floor_index[i] = -1;
+    }
+}
 void printArray(int arr[10][2]){
     int rows = 10;
     int cols = 2;
@@ -90,6 +95,7 @@ void startUp(){
         driveUp(onFloor);
     }
     elevio_floorIndicator(elevio_floorSensor());
+    previousFloor = elevio_floorSensor();
     //elevatorReady();
 }
 
@@ -106,7 +112,7 @@ bool driveToFloor(int destinationFloor){
     /*Safety part*/
     /*the driving part*/
     int currentFloor = elevio_floorSensor();
-    previousFloor = currentFloor;
+    //previousFloor = currentFloor;
     int difference = destinationFloor - previousFloor;
 
     elevio_motorDirection(direction);
@@ -114,15 +120,29 @@ bool driveToFloor(int destinationFloor){
 
     while (difference != 0 && safe){
         currentFloor = elevio_floorSensor();
+        // printf("Kjorer med direction = %d \n",direction);
+        // printf("currentFloor: %d  PreviousFloor: %d difference: %d destinationFloor: %d\n",currentFloor,previousFloor,difference, destinationFloor);
+        // printf("target floor: %d %d %d %d  floor_index[i]:  %d %d %d %d \n", targetFloor[0],targetFloor[1],targetFloor[2],targetFloor[3], floor_index[0],floor_index[1],floor_index[2],floor_index[3]);
         searchOrders();
         if(checkPassingFloors(previousFloor)){
-            elevio_motorDirection(0);
+        elevio_motorDirection(0);
             printf("Jeg returnerer fra driveToFloor \n");
             return false;
         }
         if (currentFloor == destinationFloor){
             // difference = destinationFloor - currentFloor;
+            previousFloor = currentFloor;
             elevio_motorDirection(0);
+            break;
+        }else if(direction == 1 && currentFloor == 3){
+            elevio_motorDirection(0);
+            resetArrays();
+            elevatorRunning();
+            break;
+        }else if(direction == -1 && currentFloor == 0){
+            elevio_motorDirection(0);
+            resetArrays();
+            elevatorRunning();
             break;
         }
         safe = safeToDrive();

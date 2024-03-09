@@ -34,6 +34,7 @@ void allLightsOff();
 void stopProcedure();
 int openDoorForStopButton();
 void updateDirection();
+void resetArrays();
 
 
 void deleteOrder(int);

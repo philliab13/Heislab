@@ -127,7 +127,7 @@ bool checkPassingFloors(int currentFloor){
     if(direction == 1){
         for (int i = 0; i < 10; ++i){
             //Legg in funk for å sjekke om det er duplikater det skal være test som sjekker om etasjen som trykkes allerede ligger i target floor
-            if(  ((totalOrders[i][1] == 0 || totalOrders[i][1]==2) && ((totalOrders[i][0] >= currentFloor)) && (!Duplicate(totalOrders[i][0])))   ){
+            if(  ((totalOrders[i][1] == 0 || totalOrders[i][1]==2) && ((totalOrders[i][0] > currentFloor)) && (!Duplicate(totalOrders[i][0])))   ){
                 for(int k = 0; k < 4; ++k){
                     if(targetFloor[k] == -1 && floor_index[k] == -1){
                         targetFloor[k] = totalOrders[i][0];
@@ -138,11 +138,13 @@ bool checkPassingFloors(int currentFloor){
                 }
             }
         }
-        bubbleSort(4,true);
+        //if(changes){
+            bubbleSort(4,true);
+        //}
     }
     else if (direction == -1){
         for (int i = 0; i < 10; ++i){            
-            if( ((totalOrders[i][1] == 1 || totalOrders[i][1]==2) && (totalOrders[i][0] <= currentFloor) && (!Duplicate(totalOrders[i][0]))) ){
+            if( ((totalOrders[i][1] == 1 || totalOrders[i][1]==2) && (totalOrders[i][0] < currentFloor) && (!Duplicate(totalOrders[i][0]))) ){
                 for(int k = 0; k < 4; ++k){
                     if(targetFloor[k] == -1 && floor_index[k] == -1){
                         targetFloor[k] = totalOrders[i][0];
@@ -154,7 +156,9 @@ bool checkPassingFloors(int currentFloor){
             }
         }
         /*sort largest floor first*/
-        bubbleSort(4,false);
+        //if(changes){
+            bubbleSort(4,false);
+        //}
     }
 
     if(changes){
@@ -163,16 +167,7 @@ bool checkPassingFloors(int currentFloor){
         
         return false;}
 }
-void resetArrays(){
-    for(int i = 0; i < 4; ++i){
-        targetFloor[i] = -1;
-        floor_index[i] = -1;
-    }
-    for(int i = 0; i < 10; ++i){
-        totalOrders[i][0] = -1;
-        totalOrders[i][1] = -1;
-    }
-}
+
 bool targetFloorContains(int floor) {
     for (int i = 0; i < 4; i++) {
         if (targetFloor[i] == floor) {
@@ -229,34 +224,43 @@ void executeOrder(){
                     closeDoor();
                     /*Make sure the direction is correct before checking for orders we should stop by*/
                     updateDirection();
-                     checkPassingFloors(currentFloor);
+                    checkPassingFloors(previousFloor);
+                    /* if(direction==1){
+                        bubbleSort(4,true);
+                    }else if(direction==-1){
+                        bubbleSort(4,false);
+                    } */
                     updateDirection();
                     /*starts driving to correct floor, is false if we have to make another stop before the original*/
                     bool madeItToDestination = driveToFloor(targetFloor[0]);
                     
                     printf("er her \n");
                     while(!madeItToDestination){
+                        printf("target floor: %d %d %d %d  floor_index[i]:  %d %d %d %d \n", targetFloor[0],targetFloor[1],targetFloor[2],targetFloor[3], floor_index[0],floor_index[1],floor_index[2],floor_index[3]);
                         madeItToDestination = driveToFloor(targetFloor[0]);
                     }
 
                     if(madeItToDestination){
+                        printf("inne i if, currentFloor: %d direction: %d previousFloor: %d \n",currentFloor,direction,previousFloor);
                         currentFloor = elevio_floorSensor();
                         openDoor();
-            printf("target floor: %d %d %d %d  floor_index[i]:  %d %d %d %d \n", targetFloor[0],targetFloor[1],targetFloor[2],targetFloor[3], floor_index[0],floor_index[1],floor_index[2],floor_index[3]);
+                        printf("target floor: %d %d %d %d  floor_index[i]:  %d %d %d %d \n", targetFloor[0],targetFloor[1],targetFloor[2],targetFloor[3], floor_index[0],floor_index[1],floor_index[2],floor_index[3]);
                         closeDoor();
                         deleteOrder(floor_index[0]);
                         targetFloor[0] = -1;
                         floor_index[0] = -1;
                         if(direction==1){
-                        bubbleSort(4,true);
-                    }else if(direction==-1){bubbleSort(4,false);}
+                            bubbleSort(4,true);
+                        }else if(direction==-1){
+                            bubbleSort(4,false);
+                        }
                     }
                     
-                    checkPassingFloors(currentFloor);
+                    checkPassingFloors(previousFloor);
                     
                     
                 }
-            printf("target floor: %d %d %d %d  floor_index[i]:  %d %d %d %d \n", targetFloor[0],targetFloor[1],targetFloor[2],targetFloor[3], floor_index[0],floor_index[1],floor_index[2],floor_index[3]);
+            //printf("target floor: %d %d %d %d  floor_index[i]:  %d %d %d %d \n", targetFloor[0],targetFloor[1],targetFloor[2],targetFloor[3], floor_index[0],floor_index[1],floor_index[2],floor_index[3]);
         }
         printf("kommer hit \n");
         elevatorRunning();
@@ -321,9 +325,9 @@ void updateOrders(){
     }
 }
 void updateDirection(){
-    if(elevio_floorSensor() - targetFloor[0] < 0){
+    if(previousFloor - targetFloor[0] < 0){
         direction = 1;
-    }else if(elevio_floorSensor() - targetFloor[0] > 0){
+    }else if(previousFloor - targetFloor[0] > 0){
         direction = -1;
     }else{
         direction = 0;
