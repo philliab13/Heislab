@@ -1,16 +1,9 @@
 #include "Supportfunctions.h"
 
-
- extern bool isDoorOpen;
-
- extern int  totalOrders[10][2];
- extern int targetFloor[4];
- extern int floor_index[4];
- extern bool foundOrder;
+extern int targetFloor[4];
+extern int floor_index[4];
  extern int direction;
- //extern int counter;
- extern int placement;
- extern int previousFloor;
+extern int previousFloor;
 
 void elevatorRunning(){
     while (true) {
@@ -112,4 +105,3 @@ void bubbleSort(int size, bool ascending) {
         }
     }
 }
-

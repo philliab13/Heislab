@@ -1,9 +1,9 @@
 #include "Drive.h"
 
- extern bool isDoorOpen;
- extern int direction;
- extern int previousFloor;
- extern int targetFloor[4];
+extern bool isDoorOpen;
+extern int direction;
+extern int previousFloor;
+extern int targetFloor[4];
 
 bool driveToFloor(int destinationFloor){
     int currentFloor = elevio_floorSensor();

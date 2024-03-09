@@ -1,16 +1,16 @@
 #include "HandleOrders.h"
 
 
- extern bool isDoorOpen;
+extern bool isDoorOpen;
 
- extern int  totalOrders[10][2];
- extern int targetFloor[4];
- extern int floor_index[4];
- extern bool foundOrder;
- extern int direction;
- //extern int counter;
- extern int placement;
- extern int previousFloor;
+extern int  totalOrders[10][2];
+extern int targetFloor[4];
+extern int floor_index[4];
+extern bool foundOrder;
+extern int direction;
+//extern int counter;
+extern int placement;
+extern int previousFloor;
 
  
 /*Check's if there are any orders the elevator should stop by, if yes add to targetFloor and floor_index*/
