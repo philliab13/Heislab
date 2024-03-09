@@ -10,13 +10,12 @@
 #include <time.h>
 #include <assert.h>
 
-#include "Door.h"
 #include "Drive.h"
 #include "HandleOrders.h"
+#include "lights.h"
 #include "OrderHandeling.h"
 #include "Supportfunctions.h"
 
-void allLightsOff();
-
-
-
+int openDoor();
+int closeDoor();
+int openDoorForStopButton();

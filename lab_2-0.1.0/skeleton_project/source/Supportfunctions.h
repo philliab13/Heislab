@@ -7,33 +7,25 @@
 #include "driver/elevio.h"
 #include <stdbool.h>
 #include <unistd.h>
-#include "lights.h"
 #include <time.h>
 #include <assert.h>
 
-// int targetFloor[4];
-// int floor_index[4];
-// bool foundOrder;
-// int typeOfButton;
-// int direction;
-// int counter;
-// int placement;
+#include "Door.h"
+#include "Drive.h"
+#include "HandleOrders.h"
+#include "lights.h"
+#include "OrderHandeling.h"
+
 
 
 // Declerations
 void printArray(int arr[10][2]);
 
-int openDoor();
-int closeDoor();
-bool safeToDrive();
-bool driveToFloor(int);
-void driveUp();
 void startUp();
-void allLightsOff();
 void stopProcedure();
-int openDoorForStopButton();
 void updateDirection();
 void resetArrays();
+void elevatorRunning();
 
 
 void deleteOrder(int);

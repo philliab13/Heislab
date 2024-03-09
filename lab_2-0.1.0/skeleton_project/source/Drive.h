@@ -11,12 +11,12 @@
 #include <assert.h>
 
 #include "Door.h"
-#include "Drive.h"
 #include "HandleOrders.h"
+#include "lights.h"
 #include "OrderHandeling.h"
 #include "Supportfunctions.h"
 
-void allLightsOff();
-
-
-
+bool driveToFloor(int);
+bool safeToDrive();
+void driveUp();
+void updateDirection();

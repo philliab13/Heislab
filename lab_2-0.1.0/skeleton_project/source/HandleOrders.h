@@ -12,11 +12,12 @@
 
 #include "Door.h"
 #include "Drive.h"
-#include "HandleOrders.h"
+#include "lights.h"
 #include "OrderHandeling.h"
 #include "Supportfunctions.h"
 
-void allLightsOff();
-
+bool checkPassingFloors(int);
+void executeOrder();
+void updateOrders();
 
 

@@ -12,6 +12,13 @@
  extern int placement;
  extern int previousFloor;
 
+void elevatorRunning(){
+    while (true) {
+        searchOrders();
+        executeOrder();
+    }
+}
+
 
 void resetArrays(){
     for(int i = 0; i < 4; ++i){
@@ -21,54 +28,6 @@ void resetArrays(){
 }
 
 
-/*returning 1 if sucsessfully opened door, 0 otherwise*/
-int openDoor(){
-    int floor = elevio_floorSensor();
-    time_t start, end;
-    /*checking if it safe to open door*/
-    if (floor >= 0){
-        /*Update global variable to door is open*/
-        isDoorOpen = true;
-        /*set open door light on*/
-        elevio_doorOpenLamp(1);
-        /*Keeps the door open for 3 seconds, and searches for orders at the same time*/
-        /*This is created by chat-gpt -> for report*/
-        time(&start);
-        while(true){
-            time(&end);
-            if(difftime(end,start) >= 3.0){
-                break;
-            }
-            searchOrders();
-        }
-        return 1;
-    }else{
-        return 0;
-    }
-}
-
-int closeDoor(){
-    /*check if there is an obstruction*/
-    bool obstruction = elevio_obstruction();
-    if(obstruction){
-        while(obstruction){
-            searchOrders();
-            obstruction = elevio_obstruction();
-        }
-        openDoor();
-    }
-    /*Update global variable to door is closed*/
-    elevio_doorOpenLamp(0);
-    isDoorOpen = false;
-    return 1;
-}
-
-/*checking if both the door is closed and the emergency stop button is not pressed before it is safe to drive*/
-bool safeToDrive(){
-    bool stopButton = elevio_stopButton();
-    return !isDoorOpen && !stopButton;
-}
-
 void startUp(){
     int onFloor = elevio_floorSensor();
     if (onFloor == -1){
@@ -77,73 +36,6 @@ void startUp(){
     elevio_floorIndicator(elevio_floorSensor());
     previousFloor = elevio_floorSensor();
 }
-
-void driveUp(){
-    elevio_motorDirection(1);
-    int onFloor = elevio_floorSensor();
-    while(onFloor < 0){
-        onFloor = elevio_floorSensor();
-    }
-    elevio_motorDirection(0);
-}
-
-bool driveToFloor(int destinationFloor){
-    int currentFloor = elevio_floorSensor();
-    int difference = destinationFloor - previousFloor;
-
-    elevio_motorDirection(direction);
-    bool safe = safeToDrive();
-
-    while(difference != 0 && safe){
-        currentFloor = elevio_floorSensor();
-        /*Updating the lights*/
-        switch (currentFloor){
-            case 0:
-                elevio_floorIndicator(0);
-                previousFloor = 0;
-                break;
-            case 1:
-            elevio_floorIndicator(1);
-            previousFloor = 1;
-            break;
-            case 2:
-                elevio_floorIndicator(2);
-                previousFloor = 2;
-                break;
-            case 3:
-                elevio_floorIndicator(3);
-                previousFloor = 3;
-                break;
-            default:
-                break;
-        }
-        
-        searchOrders();
-
-        if(checkPassingFloors(previousFloor)){
-            elevio_motorDirection(0);
-            return false;
-        }
-        if(currentFloor == destinationFloor){
-            elevio_motorDirection(0);
-            break;
-        }else if(direction == 1 && currentFloor == 3){
-            elevio_motorDirection(0);
-            resetArrays();
-            elevatorRunning();
-            break;
-        }else if(direction == -1 && currentFloor == 0){
-            elevio_motorDirection(0);
-            resetArrays();
-            elevatorRunning();
-            break;
-        }
-        safe = safeToDrive();        
-    }
-    elevio_motorDirection(0);
-    return true;
-}
-
 
 void stopProcedure(){
     elevio_stopLamp(1);
@@ -181,42 +73,6 @@ void stopProcedure(){
     }
     nanosleep(&(struct timespec){1,0}, NULL);
     elevatorRunning();
-}
-
-void allLightsOff(){
-    for (int f = 0; f < N_FLOORS; f++){
-        for (int b = 0; b < N_BUTTONS; b++){
-            elevio_buttonLamp(f, b, 0);
-        }
-    }
-    elevio_stopLamp(0);
-    elevio_doorOpenLamp(0);
-}
-
-
-/*returning 1 if sucsessfully opened door, 0 otherwise*/
-int openDoorForStopButton(){
-    int floor = elevio_floorSensor();
-    time_t start, end;
-    /*checking if it safe to open door*/
-    if (floor >= 0){
-        /*Update global variable to door is open*/
-        isDoorOpen = true;
-        /*set open door light on*/
-        elevio_doorOpenLamp(1);
-        /*Keeps the door open for 3 seconds, and searches for orders at the same time*/
-        /*This is created by chat-gpt -> for report*/
-        time(&start);
-        while(true){
-            time(&end);
-            if(difftime(end,start) >= 3.0){
-                break;
-            }
-        }
-        return 1;
-    }else{
-        return 0;
-    }
 }
 
 /*written by chat-gpt  --> for report*/

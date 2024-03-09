@@ -13,10 +13,12 @@
 #include "Door.h"
 #include "Drive.h"
 #include "HandleOrders.h"
-#include "OrderHandeling.h"
+#include "lights.h"
 #include "Supportfunctions.h"
 
-void allLightsOff();
 
-
-
+void searchOrders();
+void addOrder(int, int);
+void deleteOrder(int indexInArray);
+bool Duplicate(int floor);
+bool targetFloorContains(int floor);
