@@ -59,8 +59,6 @@ void searchOrders(){
 
 
 /*Add the order detected from searchOrders to the global array totalOrders*/
-/*Need failsafe for identical orders*/
-
 void addOrder(floor, button){
     /*First the function checks if the order already exist and ignores it if it does*/
     for(int i = 0; i < 10; ++i){
@@ -80,28 +78,22 @@ void addOrder(floor, button){
     }
 }
 
-/*Denne skal slette elementet på index i arrayen og flytte alt bak et hakk mot venstre  */
-/*this function should also delete all other orders for the same floor*/
+/*Delete the order at index indexInArray in totalorders, also delete all orders at same floor*/
 void deleteOrder(int indexInArray){
     assert(indexInArray >= 0 && "Index passed to delete order is <0");
     int floor = totalOrders[indexInArray][0];
-    /*
-    for (int i = 0; i < 2; i++)    {
-
-        totalOrders[indexInArray][i] = -1;
-        elevio_floorIndicator(indexInArray);
-    }
-    */
+    /*Turn of light for the order to be deleted*/
     if(totalOrders[indexInArray][0] != -1){
         elevio_buttonLamp(totalOrders[indexInArray][0], totalOrders[indexInArray][1], 0);
     }
+    /*Scans through and shift's every element to the left from indexInArray*/
     for (int i = indexInArray; i < 9; i++){
         totalOrders[i][0] = totalOrders[i + 1][0];
         totalOrders[i][1] = totalOrders[i + 1][1];
     }
     totalOrders[9][0] = -1;
     totalOrders[9][1] = -1;
-
+    /*deletes other orders from same floor*/
     for (int i = 0; i < 10; ++i){
         if(totalOrders[i][0] == floor && floor != -1){
             deleteOrder(i);
@@ -109,6 +101,8 @@ void deleteOrder(int indexInArray){
     }
 }
 
+/*TODO: switch function*/
+/*Function check's if there are any other orders for the same floor in targetFloor*/
 bool Duplicate(int floor){
     for(int i=0; i<4; i++){
         if(floor==targetFloor[i]){
@@ -117,16 +111,22 @@ bool Duplicate(int floor){
     }
     return false;
 }
+bool targetFloorContains(int floor) {
+    for (int i = 0; i < 4; i++) {
+        if (targetFloor[i] == floor) {
+            return true; // Floor found in the array
+        }
+    }
+    return false; // Floor not found in the array
+}
 
-/*This function checks the totalOrder array and checks if there are any orders going the same direction on passing floors*/
-/*If yes, updates the arrays targetFloor with what floor the order is on and index for location in totalOrder*/
-/*defyning that going up equals a positive number for direction*/
-/*Tested, should in theory work*/
+/*Check's if there are any orders the elevator should stop by, if yes add to targetFloor and floor_index*/
 bool checkPassingFloors(int currentFloor){
     bool changes= false;
     if(direction == 1){
         for (int i = 0; i < 10; ++i){
-            //Legg in funk for å sjekke om det er duplikater det skal være test som sjekker om etasjen som trykkes allerede ligger i target floor
+            //if the elevator is moving up an order need's to be either an hall_up or cab button. At the same time the floor in question needs
+            //to be over the floor we are currently at. The function ignores orders from floors that already have an order in targetFloor
             if(  ((totalOrders[i][1] == 0 || totalOrders[i][1]==2) && ((totalOrders[i][0] > currentFloor)) && (!Duplicate(totalOrders[i][0])))   ){
                 for(int k = 0; k < 4; ++k){
                     if(targetFloor[k] == -1 && floor_index[k] == -1){
@@ -138,9 +138,8 @@ bool checkPassingFloors(int currentFloor){
                 }
             }
         }
-        //if(changes){
-            bubbleSort(4,true);
-        //}
+        /*Sort the targetFloor and floor_index from smallest to largest number*/
+        bubbleSort(4,true);
     }
     else if (direction == -1){
         for (int i = 0; i < 10; ++i){            
@@ -156,157 +155,76 @@ bool checkPassingFloors(int currentFloor){
             }
         }
         /*sort largest floor first*/
-        //if(changes){
-            bubbleSort(4,false);
-        //}
+        bubbleSort(4,false);
     }
-
     if(changes){
         return true;
     }else{
-        
         return false;}
 }
 
-bool targetFloorContains(int floor) {
-    for (int i = 0; i < 4; i++) {
-        if (targetFloor[i] == floor) {
-            return true; // Floor found in the array
-        }
-    }
-    return false; // Floor not found in the array
-}
-
-
-
-
-/*Find if there happens to be an order for the floor we are stopping at*/
-int findOrderOnFloor(int floor){
-    for (int i = 0; i < 10; ++i){
-        if (totalOrders[i][0] == floor){
-            return i;
-        }
-    }
-    return -1;
-}
-
-
 void executeOrder(){
     /*reset's variables*/
-    //counter = 0;
     placement=0;
     foundOrder = false;
     direction = 0;
-
     for(int i = 0; i < 4; ++i){
         targetFloor[i] = -1;
         floor_index[i] = -1;
     }
     int currentFloor = elevio_floorSensor();
+
     /*pick the oldest order*/
     updateOrders();
 
     if(foundOrder){
-        /*check if it it on the same floor*/
-        if (currentFloor == targetFloor[0]){
+        /*check if the elevator is on the same floor as the destination floor*/
+        if(currentFloor == targetFloor[0]){
             openDoor();
             closeDoor();
             deleteOrder(floor_index[0]);
-            targetFloor[0] = -1;
-            floor_index[0] = -1;
+            // targetFloor[0] = -1;
+            // floor_index[0] = -1;
             elevatorRunning();
         }
-        /*while should run as long as we have orders in the same direction*/
+        /*while runs as long as we have orders left to execute in this direction*/
         while(targetFloor[0] != -1 || targetFloor[1] != -1 || targetFloor[2] != -1 || targetFloor[3] != -1){
-            //counter = 0;
-                //printf("halooo %d\n", targetFloor[i]);
-                if(targetFloor[0] >= 0){
+            if(targetFloor[0] >= 0){
+                closeDoor();
+                /*Make sure the direction is correct before checking for orders we should stop by*/
+                updateDirection();
+                /*Check for orders worth stopping by*/
+                checkPassingFloors(previousFloor);
+                updateDirection();
+                /*elevator start driving first target floor*/
+                bool madeItToDestination = driveToFloor(targetFloor[0]);
+                /*True if new order is added to targetFloor*/
+                while(!madeItToDestination){
+                    madeItToDestination = driveToFloor(targetFloor[0]);
+                }
+
+                if(madeItToDestination){
+                    currentFloor = elevio_floorSensor();
+                    openDoor();
                     closeDoor();
-                    /*Make sure the direction is correct before checking for orders we should stop by*/
-                    updateDirection();
-                    checkPassingFloors(previousFloor);
-                    /* if(direction==1){
+                    deleteOrder(floor_index[0]);
+                    targetFloor[0] = -1;
+                    floor_index[0] = -1;
+                    if(direction==1){
                         bubbleSort(4,true);
                     }else if(direction==-1){
                         bubbleSort(4,false);
-                    } */
-                    updateDirection();
-                    /*starts driving to correct floor, is false if we have to make another stop before the original*/
-                    bool madeItToDestination = driveToFloor(targetFloor[0]);
-                    
-                    printf("er her \n");
-                    while(!madeItToDestination){
-                        printf("target floor: %d %d %d %d  floor_index[i]:  %d %d %d %d \n", targetFloor[0],targetFloor[1],targetFloor[2],targetFloor[3], floor_index[0],floor_index[1],floor_index[2],floor_index[3]);
-                        madeItToDestination = driveToFloor(targetFloor[0]);
                     }
-
-                    if(madeItToDestination){
-                        printf("inne i if, currentFloor: %d direction: %d previousFloor: %d \n",currentFloor,direction,previousFloor);
-                        currentFloor = elevio_floorSensor();
-                        openDoor();
-                        printf("target floor: %d %d %d %d  floor_index[i]:  %d %d %d %d \n", targetFloor[0],targetFloor[1],targetFloor[2],targetFloor[3], floor_index[0],floor_index[1],floor_index[2],floor_index[3]);
-                        closeDoor();
-                        deleteOrder(floor_index[0]);
-                        targetFloor[0] = -1;
-                        floor_index[0] = -1;
-                        if(direction==1){
-                            bubbleSort(4,true);
-                        }else if(direction==-1){
-                            bubbleSort(4,false);
-                        }
-                    }
-                    
-                    checkPassingFloors(previousFloor);
-                    
-                    
                 }
-            //printf("target floor: %d %d %d %d  floor_index[i]:  %d %d %d %d \n", targetFloor[0],targetFloor[1],targetFloor[2],targetFloor[3], floor_index[0],floor_index[1],floor_index[2],floor_index[3]);
-        }
-        printf("kommer hit \n");
-        elevatorRunning();
-    }
-    //updateOrders();
-    // if(foundOrder){
-
-    //     if (currentFloor == targetFloor[0]){
-    //         openDoor();
-    //         deleteOrder(floor_index[0]);
-    //         closeDoor();
-    //         targetFloor[0] = -1;
-    //         floor_index[0] = -1;
-    //         elevatorRunning();
-    //     }
-
-    //     completeNextOrder(currentFloor);
-    //     }
-}
-
-void updateOrdersCab(){
-        /*Iterates through the order array and picks an order to execute.*/
-    /*In this loop we are looking for orders from inside the elevator, these are prioritized*/
-    /*Sets foundOder = true so that we don't look for more orders once one is found*/
-    // for (int i = 0; i < 10; ++i) {
-    //     if((totalOrders[i][0] != -1) && (totalOrders[i][1] == 2)){
-    //         targetFloor[0] = totalOrders[i][0];
-    //         typeOfButton = totalOrders[i][1];
-    //         floor_index[0] = i;
-    //         foundOrder = true;
-    //         break;
-    //     }
-    // }
-    if(foundOrder){
-        if(elevio_floorSensor() - targetFloor[0] < 0){
-            direction = 1;
-        }else if(elevio_floorSensor() - targetFloor[0] > 0){
-            direction = -1;
+                checkPassingFloors(previousFloor);
+            }
         }
     }
 }
 
+/*Looks for an order to execute, pick the oldest one if there are any*/
+/*sets the global variable foundOrder = true if found*/
 void updateOrders(){
-    /*Iterates through the order array and picks an order to execute.*/
-    /*In this loop we are looking for orders from inside the elevator, these are prioritized*/
-    /*Sets foundOder = true so that we don't look for more orders once one is found*/
     for (int i = 0; i < 10; ++i) {
         if(totalOrders[i][0] != -1){
             targetFloor[0] = totalOrders[i][0];
@@ -338,10 +256,7 @@ int main(){
     elevio_init();
     startUp();
     allLightsOff();
-
     elevatorRunning();
-
-  
     return 0;
 }
 

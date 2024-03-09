@@ -19,27 +19,10 @@ void resetArrays(){
         floor_index[i] = -1;
     }
 }
-void printArray(int arr[10][2]){
-    int rows = 10;
-    int cols = 2;
-    for(int i = 0; i < rows; i++) {
-        printf("[");
-        for(int j = 0; j < cols; j++) {
-            printf("%d", arr[i][j]);
-            if(j != cols - 1) {
-                printf(", ");
-            }
-        }
-        printf("]\n");
-    }
-}
-
 
 
 /*returning 1 if sucsessfully opened door, 0 otherwise*/
 int openDoor(){
-    printf("er i openDoor \n");
-
     int floor = elevio_floorSensor();
     time_t start, end;
     /*checking if it safe to open door*/
@@ -52,21 +35,18 @@ int openDoor(){
         /*This is created by chat-gpt -> for report*/
         time(&start);
         while(true){
-            //printf("kjorer \n");
             time(&end);
             if(difftime(end,start) >= 3.0){
                 break;
             }
             searchOrders();
         }
-        
         return 1;
-    }
-    else{
+    }else{
         return 0;
     }
 }
-/*returning 1 if sucsessfully closed door, 0 otherwise*/
+
 int closeDoor(){
     /*check if there is an obstruction*/
     bool obstruction = elevio_obstruction();
@@ -92,15 +72,15 @@ bool safeToDrive(){
 void startUp(){
     int onFloor = elevio_floorSensor();
     if (onFloor == -1){
-        driveUp(onFloor);
+        driveUp();
     }
     elevio_floorIndicator(elevio_floorSensor());
     previousFloor = elevio_floorSensor();
-    //elevatorReady();
 }
 
-void driveUp(int onFloor){
+void driveUp(){
     elevio_motorDirection(1);
+    int onFloor = elevio_floorSensor();
     while(onFloor < 0){
         onFloor = elevio_floorSensor();
     }
@@ -108,45 +88,14 @@ void driveUp(int onFloor){
 }
 
 bool driveToFloor(int destinationFloor){
-    printf("Jeg kommer til driveToFloor \n");
-    /*Safety part*/
-    /*the driving part*/
     int currentFloor = elevio_floorSensor();
-    //previousFloor = currentFloor;
     int difference = destinationFloor - previousFloor;
 
     elevio_motorDirection(direction);
     bool safe = safeToDrive();
 
-    while (difference != 0 && safe){
+    while(difference != 0 && safe){
         currentFloor = elevio_floorSensor();
-        // printf("Kjorer med direction = %d \n",direction);
-        // printf("currentFloor: %d  PreviousFloor: %d difference: %d destinationFloor: %d\n",currentFloor,previousFloor,difference, destinationFloor);
-        // printf("target floor: %d %d %d %d  floor_index[i]:  %d %d %d %d \n", targetFloor[0],targetFloor[1],targetFloor[2],targetFloor[3], floor_index[0],floor_index[1],floor_index[2],floor_index[3]);
-        searchOrders();
-        if(checkPassingFloors(previousFloor)){
-        elevio_motorDirection(0);
-            printf("Jeg returnerer fra driveToFloor \n");
-            return false;
-        }
-        if (currentFloor == destinationFloor){
-            // difference = destinationFloor - currentFloor;
-            previousFloor = currentFloor;
-            elevio_motorDirection(0);
-            break;
-        }else if(direction == 1 && currentFloor == 3){
-            elevio_motorDirection(0);
-            resetArrays();
-            elevatorRunning();
-            break;
-        }else if(direction == -1 && currentFloor == 0){
-            elevio_motorDirection(0);
-            resetArrays();
-            elevatorRunning();
-            break;
-        }
-        safe = safeToDrive();
-
         /*Updating the lights*/
         switch (currentFloor){
             case 0:
@@ -168,44 +117,33 @@ bool driveToFloor(int destinationFloor){
             default:
                 break;
         }
-    }
-    elevio_motorDirection(0);
-    switch (currentFloor){
-        case 0:
-            elevio_floorIndicator(0);
+        
+        searchOrders();
+
+        if(checkPassingFloors(previousFloor)){
+            elevio_motorDirection(0);
+            return false;
+        }
+        if(currentFloor == destinationFloor){
+            elevio_motorDirection(0);
             break;
-        case 1:
-        elevio_floorIndicator(1);
-        break;
-        case 2:
-            elevio_floorIndicator(2);
+        }else if(direction == 1 && currentFloor == 3){
+            elevio_motorDirection(0);
+            resetArrays();
+            elevatorRunning();
             break;
-        case 3:
-            elevio_floorIndicator(3);
-            break;
-        default:
+        }else if(direction == -1 && currentFloor == 0){
+            elevio_motorDirection(0);
+            resetArrays();
+            elevatorRunning();
             break;
         }
+        safe = safeToDrive();        
+    }
+    elevio_motorDirection(0);
     return true;
 }
 
-/*This function is for finding the right floor to drive the elevator to first*/
-int findNearestFloor(int currentFloor){
-    int closest = 10; 
-    int nextFloor;
-    for (int i = 0; i < 4; ++i){
-        if(targetFloor[i] != -1){
-            if (abs(targetFloor[i] - currentFloor) < closest) { // Check if the value is not -1
-                //check logic here
-                closest = abs(targetFloor[i] - currentFloor); // Update closest if found a smaller value
-                placement = i;
-                nextFloor = targetFloor[i];
-            }
-        }
-    }
-    targetFloor[placement] = -1;
-    return nextFloor;
-}
 
 void stopProcedure(){
     elevio_stopLamp(1);
@@ -216,11 +154,10 @@ void stopProcedure(){
         deleteOrder(0);
     }
 
-
     if(floor >= 0){
         elevio_doorOpenLamp(1);
+        /*nanosleep so the program does not confuse a slow button press for two*/
         nanosleep(&(struct timespec){1,0}, NULL);
-        //nanosleep?
         while(true){
             if(elevio_stopButton()){
                 elevio_stopLamp(0);
@@ -228,13 +165,8 @@ void stopProcedure(){
             }
 
         }
-        printf("Jeg er ute av loop\n");
         openDoorForStopButton();
-                printf("Jeg er etter openDoor\n");
-
         closeDoor();
-                printf("Jeg er etter closeDoor\n");
-
         elevio_floorIndicator(elevio_floorSensor());
     }else{
         nanosleep(&(struct timespec){1,0}, NULL);
@@ -244,10 +176,9 @@ void stopProcedure(){
                 break;
             }
         }
-        driveUp(floor);
+        driveUp();
         elevio_floorIndicator(elevio_floorSensor());
     }
-    printf("jeg kommer hit \n");
     nanosleep(&(struct timespec){1,0}, NULL);
     elevatorRunning();
 }
@@ -277,59 +208,18 @@ int openDoorForStopButton(){
         /*This is created by chat-gpt -> for report*/
         time(&start);
         while(true){
-            //printf("kjorer \n");
             time(&end);
             if(difftime(end,start) >= 3.0){
                 break;
             }
         }
-        
         return 1;
-    }
-    else{
+    }else{
         return 0;
     }
 }
 
-
-/*This function should be working -> tested*/
-
-// void bubbleSort(int size, bool ascending) {
-// // Loop through each element of the array
-//     for (int i = 0; i < size - 1; i++) {
-//         for (int j = 0; j < size - i - 1; j++) {
-//             // Determine if a swap should occur
-//             bool shouldSwap = false;
-
-//             if (ascending) {
-//                 // For ascending order, move -1 to the end and sort the rest
-//                 if ((targetFloor[j] == -1 && targetFloor[j + 1] != -1) ||
-//                     (targetFloor[j] != -1 && targetFloor[j + 1] != -1 && targetFloor[j] > targetFloor[j + 1])) {
-//                     shouldSwap = true;
-//                 }
-//             } else {
-//                 // For descending order, ensure -1 stays at the end and sort the rest
-//                 if ((targetFloor[j] != -1 && targetFloor[j + 1] == -1) ||
-//                     (targetFloor[j] != -1 && targetFloor[j + 1] != -1 && targetFloor[j] < targetFloor[j + 1])) {
-//                     shouldSwap = true;
-//                 }
-//             }
-
-//             // Perform the swap if necessary
-//             if (shouldSwap) {
-//                 int temp = targetFloor[j];
-//                 targetFloor[j] = targetFloor[j + 1];
-//                 targetFloor[j + 1] = temp;
-
-//                 // Swap the floor_index values in parallel to maintain linkage
-//                 temp = floor_index[j];
-//                 floor_index[j] = floor_index[j + 1];
-//                 floor_index[j + 1] = temp;
-//             }
-//         }
-//     }
-// }
-
+/*written by chat-gpt  --> for report*/
 void bubbleSort(int size, bool ascending) {
     // Loop through each element of the array
     for (int i = 0; i < size - 1; i++) {
@@ -367,27 +257,3 @@ void bubbleSort(int size, bool ascending) {
     }
 }
 
-
-
-// void printArraysss(int size) {
-//     printf("targetFloor: ");
-//     for (int i = 0; i < size; i++) {
-//         printf("%d ", targetFloor[i]);
-//     }
-//     printf("\n");
-
-//     printf("floor_index: ");
-//     for (int i = 0; i < size; i++) {
-//         printf("%d ", floor_index[i]);
-//     }
-//     printf("\n\n");
-// }
-//     int size = sizeof(targetFloor) / sizeof(targetFloor[0]);
-//     // Test sorting in ascending order
-//     printf("Sorting in ascending order:\n");
-//     bubbleSort(size, 1);
-//     printArraysss(size);
-//     // Test sorting in descending order
-//     printf("Sorting in descending order:\n");
-//     bubbleSort(size, 0);
-//     printArraysss(size);
