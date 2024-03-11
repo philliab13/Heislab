@@ -76,9 +76,6 @@ void executeOrder(){
         if(currentFloor == targetFloor[0]){
             openDoor();
             closeDoor();
-            deleteOrder(floor_index[0]);
-            // targetFloor[0] = -1;
-            // floor_index[0] = -1;
             elevatorRunning();
         }
         /*while runs as long as we have orders left to execute in this direction*/
@@ -101,7 +98,6 @@ void executeOrder(){
                     currentFloor = elevio_floorSensor();
                     openDoor();
                     closeDoor();
-                    deleteOrder(floor_index[0]);
                     targetFloor[0] = -1;
                     floor_index[0] = -1;
                     if(direction==1){

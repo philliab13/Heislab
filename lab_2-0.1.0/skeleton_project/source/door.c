@@ -1,6 +1,7 @@
 #include "Door.h"
 
- extern bool isDoorOpen;
+extern bool isDoorOpen;
+extern int  totalOrders[10][2];
 
 
 /*returning 1 if sucsessfully opened door, 0 otherwise*/
@@ -40,6 +41,11 @@ int closeDoor(){
         openDoor();
     }
     /*Update global variable to door is closed*/
+    for(int i=0; i<10;i++){
+        if(elevio_floorSensor()==totalOrders[i][0]){
+            deleteOrder(i);
+        }
+    }
     elevio_doorOpenLamp(0);
     isDoorOpen = false;
     return 1;
