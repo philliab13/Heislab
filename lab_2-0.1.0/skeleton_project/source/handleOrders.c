@@ -7,7 +7,7 @@ extern int  totalOrders[10][2];
 extern int targetFloor[4];
 extern int floor_index[4];
 extern bool foundOrder;
-extern int direction;
+extern MotorDirection direction;
 //extern int counter;
 extern int placement;
 extern int previousFloor;
@@ -16,7 +16,7 @@ extern int previousFloor;
 /*Check's if there are any orders the elevator should stop by, if yes add to targetFloor and floor_index*/
 bool checkPassingFloors(int currentFloor){
     bool changes= false;
-    if(direction == 1){
+    if(direction == DIRN_UP){
         for (int i = 0; i < 10; ++i){
             //if the elevator is moving up an order need's to be either an hall_up or cab button. At the same time the floor in question needs
             //to be over the floor we are currently at. The function ignores orders from floors that already have an order in targetFloor
@@ -34,7 +34,7 @@ bool checkPassingFloors(int currentFloor){
         /*Sort the targetFloor and floor_index from smallest to largest number*/
         bubbleSort(4,true);
     }
-    else if (direction == -1){
+    else if (direction == DIRN_DOWN){
         for (int i = 0; i < 10; ++i){            
             if( ((totalOrders[i][1] == 1 || totalOrders[i][1]==2) && (totalOrders[i][0] < currentFloor) && (!Duplicate(totalOrders[i][0]))) ){
                 for(int k = 0; k < 4; ++k){
@@ -61,12 +61,12 @@ void executeOrder(){
     /*reset's variables*/
     placement=0;
     foundOrder = false;
-    direction = 0;
+    direction = DIRN_STOP;
     for(int i = 0; i < 4; ++i){
         targetFloor[i] = -1;
         floor_index[i] = -1;
     }
-    int currentFloor = elevio_floorSensor();
+    int currentFloor = previousFloor;
 
     /*pick the oldest order*/
     updateOrders();
@@ -100,9 +100,9 @@ void executeOrder(){
                     closeDoor();
                     targetFloor[0] = -1;
                     floor_index[0] = -1;
-                    if(direction==1){
+                    if(direction==DIRN_UP){
                         bubbleSort(4,true);
-                    }else if(direction==-1){
+                    }else if(direction==DIRN_DOWN){
                         bubbleSort(4,false);
                     }
                 }
@@ -126,9 +126,9 @@ void updateOrders(){
     }
     if(foundOrder){
         if(elevio_floorSensor() - targetFloor[0] < 0){
-            direction = 1;
+            direction = DIRN_UP;
         }else if(elevio_floorSensor() - targetFloor[0] > 0){
-            direction = -1;
+            direction = DIRN_DOWN;
         }
     }
 }

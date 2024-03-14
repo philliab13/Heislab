@@ -1,7 +1,7 @@
 #include "Drive.h"
 
 extern bool isDoorOpen;
-extern int direction;
+extern MotorDirection direction;
 extern int previousFloor;
 extern int targetFloor[4];
 
@@ -39,26 +39,26 @@ bool driveToFloor(int destinationFloor){
         searchOrders();
 
         if(checkPassingFloors(previousFloor)){
-            elevio_motorDirection(0);
+            elevio_motorDirection(DIRN_STOP);
             return false;
         }
         if(currentFloor == destinationFloor){
-            elevio_motorDirection(0);
+            elevio_motorDirection(DIRN_STOP);
             break;
-        }else if(direction == 1 && currentFloor == 3){
-            elevio_motorDirection(0);
+        }else if(direction == DIRN_UP && currentFloor == 3){
+            elevio_motorDirection(DIRN_STOP);
             resetArrays();
             elevatorRunning();
             break;
-        }else if(direction == -1 && currentFloor == 0){
-            elevio_motorDirection(0);
+        }else if(direction == DIRN_DOWN && currentFloor == 0){
+            elevio_motorDirection(DIRN_STOP);
             resetArrays();
             elevatorRunning();
             break;
         }
         safe = safeToDrive();        
     }
-    elevio_motorDirection(0);
+    elevio_motorDirection(DIRN_STOP);
     return true;
 }
 
@@ -69,20 +69,27 @@ bool safeToDrive(){
 }
 
 void driveUp(){
-    elevio_motorDirection(1);
+    elevio_motorDirection(DIRN_UP);
     int onFloor = elevio_floorSensor();
     while(onFloor < 0){
         onFloor = elevio_floorSensor();
     }
-    elevio_motorDirection(0);
+    elevio_motorDirection(DIRN_STOP);
 }
-
+void driveDown(){
+    elevio_motorDirection(DIRN_DOWN);
+    int onFloor = elevio_floorSensor();
+    while(onFloor < 0){
+        onFloor = elevio_floorSensor();
+    }
+    elevio_motorDirection(DIRN_STOP);
+}
 void updateDirection(){
     if(previousFloor - targetFloor[0] < 0){
-        direction = 1;
+        direction = DIRN_UP;
     }else if(previousFloor - targetFloor[0] > 0){
-        direction = -1;
+        direction = DIRN_DOWN;
     }else{
-        direction = 0;
+        direction = DIRN_STOP;
     }
 }

@@ -19,4 +19,5 @@
 bool driveToFloor(int);
 bool safeToDrive();
 void driveUp();
+void driveDown();
 void updateDirection();

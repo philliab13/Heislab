@@ -2,7 +2,7 @@
 
 extern int targetFloor[4];
 extern int floor_index[4];
- extern int direction;
+extern MotorDirection direction;
 extern int previousFloor;
 
 void elevatorRunning(){
@@ -32,7 +32,7 @@ void startUp(){
 
 void stopProcedure(){
     elevio_stopLamp(1);
-    elevio_motorDirection(0);
+    elevio_motorDirection(DIRN_STOP);
     int floor = elevio_floorSensor();
 
     for(int i = 0; i < 10; ++i){
@@ -61,10 +61,18 @@ void stopProcedure(){
                 break;
             }
         }
-        driveUp();
+        if(direction == DIRN_UP){
+            driveUp();
+            previousFloor += 1;
+        }else if(direction == DIRN_DOWN){
+            driveDown();
+            previousFloor -= 1;
+        }
+
         elevio_floorIndicator(elevio_floorSensor());
     }
     nanosleep(&(struct timespec){1,0}, NULL);
+    direction = DIRN_STOP;
     elevatorRunning();
 }
 
