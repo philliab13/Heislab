@@ -21,7 +21,7 @@ bool checkPassingFloors(int currentFloor){
             //if the elevator is moving up an order need's to be either an hall_up or cab button. At the same time the floor in question needs
             //to be over the floor we are currently at. The function ignores orders from floors that already have an order in targetFloor
             if(  ((totalOrders[i][1] == 0 || totalOrders[i][1]==2) && ((totalOrders[i][0] > currentFloor)) && (!Duplicate(totalOrders[i][0])))   ){
-                for(int k = 0; k < 4; ++k){
+                for(int k = 0; k < N_FLOORS; ++k){
                     if(targetFloor[k] == -1 && floor_index[k] == -1){
                         targetFloor[k] = totalOrders[i][0];
                         floor_index[k] = i;
@@ -32,12 +32,12 @@ bool checkPassingFloors(int currentFloor){
             }
         }
         /*Sort the targetFloor and floor_index from smallest to largest number*/
-        bubbleSort(4,true);
+        bubbleSort(N_FLOORS,true);
     }
     else if (direction == DIRN_DOWN){
         for (int i = 0; i < 10; ++i){            
             if( ((totalOrders[i][1] == 1 || totalOrders[i][1]==2) && (totalOrders[i][0] < currentFloor) && (!Duplicate(totalOrders[i][0]))) ){
-                for(int k = 0; k < 4; ++k){
+                for(int k = 0; k < N_FLOORS; ++k){
                     if(targetFloor[k] == -1 && floor_index[k] == -1){
                         targetFloor[k] = totalOrders[i][0];
                         floor_index[k] = i;
@@ -48,7 +48,7 @@ bool checkPassingFloors(int currentFloor){
             }
         }
         /*sort largest floor first*/
-        bubbleSort(4,false);
+        bubbleSort(N_FLOORS,false);
     }
     if(changes){
         return true;
@@ -62,7 +62,7 @@ void executeOrder(){
     placement=0;
     foundOrder = false;
     direction = DIRN_STOP;
-    for(int i = 0; i < 4; ++i){
+    for(int i = 0; i < N_FLOORS; ++i){
         targetFloor[i] = -1;
         floor_index[i] = -1;
     }
@@ -79,6 +79,7 @@ void executeOrder(){
             elevatorRunning();
         }
         /*while runs as long as we have orders left to execute in this direction*/
+        /*the logic for the while-loop need changing if the number of floors increases.*/
         while(targetFloor[0] != -1 || targetFloor[1] != -1 || targetFloor[2] != -1 || targetFloor[3] != -1){
             if(targetFloor[0] >= 0){
                 closeDoor();
@@ -101,9 +102,9 @@ void executeOrder(){
                     targetFloor[0] = -1;
                     floor_index[0] = -1;
                     if(direction==DIRN_UP){
-                        bubbleSort(4,true);
+                        bubbleSort(N_FLOORS,true);
                     }else if(direction==DIRN_DOWN){
-                        bubbleSort(4,false);
+                        bubbleSort(N_FLOORS,false);
                     }
                 }
                 checkPassingFloors(previousFloor);

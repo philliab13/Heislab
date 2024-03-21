@@ -21,4 +21,3 @@ void searchOrders();
 void addOrder(int, int);
 void deleteOrder(int indexInArray);
 bool Duplicate(int floor);
-bool targetFloorContains(int floor);

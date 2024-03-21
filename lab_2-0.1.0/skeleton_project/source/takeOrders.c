@@ -66,18 +66,10 @@ void deleteOrder(int indexInArray){
 /*TODO: switch function*/
 /*Function check's if there are any other orders for the same floor in targetFloor*/
 bool Duplicate(int floor){
-    for(int i=0; i<4; i++){
+    for(int i=0; i < 4; i++){
         if(floor==targetFloor[i]){
             return true;
         }
     }
     return false;
-}
-bool targetFloorContains(int floor) {
-    for (int i = 0; i < 4; i++) {
-        if (targetFloor[i] == floor) {
-            return true; // Floor found in the array
-        }
-    }
-    return false; // Floor not found in the array
 }

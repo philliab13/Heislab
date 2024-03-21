@@ -14,7 +14,7 @@ void elevatorRunning(){
 
 
 void resetArrays(){
-    for(int i = 0; i < 4; ++i){
+    for(int i = 0; i < N_FLOORS; ++i){
         targetFloor[i] = -1;
         floor_index[i] = -1;
     }

@@ -4,9 +4,10 @@
 bool isDoorOpen = false;
 bool foundOrder = false;
 
-int  totalOrders[10][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
-int targetFloor[4]={-1,-1,-1, -1};
-int floor_index[4] = {-1, -1, -1, -1};
+/*the length of these variables would need changing if the number of floors increases.*/
+    int totalOrders[10][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
+    int targetFloor[4]={-1,-1,-1, -1};
+    int floor_index[4] = {-1, -1, -1, -1};
 
 MotorDirection direction = DIRN_STOP;
 int placement = 0;

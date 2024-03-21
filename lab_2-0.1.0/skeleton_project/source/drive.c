@@ -15,6 +15,7 @@ bool driveToFloor(int destinationFloor){
     while(difference != 0 && safe){
         currentFloor = elevio_floorSensor();
         /*Updating the lights*/
+        /*This switch statement would need changing if the number of floors increases.*/
         switch (currentFloor){
             case 0:
                 elevio_floorIndicator(0);
@@ -45,7 +46,7 @@ bool driveToFloor(int destinationFloor){
         if(currentFloor == destinationFloor){
             elevio_motorDirection(DIRN_STOP);
             break;
-        }else if(direction == DIRN_UP && currentFloor == 3){
+        }else if(direction == DIRN_UP && currentFloor == (N_FLOORS - 1)){
             elevio_motorDirection(DIRN_STOP);
             resetArrays();
             elevatorRunning();
